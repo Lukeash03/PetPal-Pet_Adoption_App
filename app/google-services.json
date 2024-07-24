@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "965804874509",
+    "project_id": "petpal-pet-adoption",
+    "storage_bucket": "petpal-pet-adoption.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:965804874509:android:1df44b2ae2664af187ee44",
+        "android_client_info": {
+          "package_name": "com.luke.petpal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfqO6u7BoR1d3GKGAhIlR4POGQhjIDTDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
