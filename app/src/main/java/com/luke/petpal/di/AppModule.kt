@@ -1,8 +1,8 @@
 package com.luke.petpal.di
 
 import com.google.firebase.auth.FirebaseAuth
-import com.luke.petpal.data.AuthRepository
-import com.luke.petpal.data.AuthRepositoryImpl
+import com.luke.petpal.data.repository.AuthRepository
+import com.luke.petpal.domain.repository.AuthRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

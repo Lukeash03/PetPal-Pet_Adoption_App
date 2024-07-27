@@ -1,14 +1,15 @@
-package com.luke.petpal.components
+package com.luke.petpal.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,15 +18,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import com.luke.petpal.ui.theme.AppIcons
+import com.luke.petpal.presentation.theme.AppIcons
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsernameInput(
     label: String,
@@ -56,10 +58,15 @@ fun UsernameInput(
             autoCorrect = true,
             keyboardType = KeyboardType.Ascii,
             imeAction = ImeAction.Next
+        ),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailInput(
     label: String,
@@ -90,10 +97,15 @@ fun EmailInput(
             autoCorrect = true,
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
+        ),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordInput(
     label: String,
@@ -141,8 +153,11 @@ fun PasswordInput(
             capitalization = KeyboardCapitalization.None,
             autoCorrect = true,
             keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Next
+            imeAction = ImeAction.Done
+        ),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
-
     )
 }

@@ -1,11 +1,10 @@
-package com.luke.petpal.ui.auth
+package com.luke.petpal.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.luke.petpal.data.AuthRepository
-import com.luke.petpal.data.Resource
-import com.luke.petpal.data.utils.await
+import com.luke.petpal.data.repository.AuthRepository
+import com.luke.petpal.data.models.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

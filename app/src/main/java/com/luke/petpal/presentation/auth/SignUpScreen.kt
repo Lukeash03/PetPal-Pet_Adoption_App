@@ -1,4 +1,4 @@
-package com.luke.petpal.ui.auth
+package com.luke.petpal.presentation.auth
 
 import android.content.res.Configuration
 import android.widget.Toast
@@ -35,43 +35,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.luke.petpal.R
-import com.luke.petpal.components.EmailInput
-import com.luke.petpal.components.PasswordInput
-import com.luke.petpal.data.Resource
-import com.luke.petpal.navigation.ROUTE_FORGOT_PASSWORD
+import com.luke.petpal.presentation.components.EmailInput
+import com.luke.petpal.presentation.components.PasswordInput
+import com.luke.petpal.presentation.components.UsernameInput
+import com.luke.petpal.data.models.Resource
 import com.luke.petpal.navigation.ROUTE_HOME
 import com.luke.petpal.navigation.ROUTE_LOGIN
-import com.luke.petpal.navigation.ROUTE_SIGNUP
-import com.luke.petpal.ui.theme.AppIcons
-import com.luke.petpal.ui.theme.PetPalTheme
-import com.luke.petpal.ui.theme.appColorPrimary
-import com.luke.petpal.ui.theme.appColorPrimaryLight
-import com.luke.petpal.ui.theme.appColorSecondary
+import com.luke.petpal.navigation.ROUTE_SIGNUP_DETAILED
+import com.luke.petpal.presentation.theme.AppIcons
+import com.luke.petpal.presentation.theme.PetPalTheme
+import com.luke.petpal.presentation.theme.appColorPrimary
+import com.luke.petpal.presentation.theme.appColorSecondary
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
+fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    val loginFlow = viewModel?.loginFlow?.collectAsState()
-
+    val emailFocusRequester = FocusRequester()
     val passwordFocusRequester = FocusRequester()
     val focusManager: FocusManager = LocalFocusManager.current
+
+    val signupFlow = viewModel?.signUpFlow?.collectAsState()
 
     Column(
         Modifier
@@ -83,26 +83,27 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
     ) {
 
         Box(
-            modifier = Modifier.weight(3f),
+            modifier = Modifier
+                .weight(3f),
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.login_dog_pic),
+                painter = painterResource(id = R.drawable.signup_pic),
                 contentDescription = "logo",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
                     .fillMaxSize()
                     .offset(y = 30.dp)
                     .graphicsLayer(
-                        scaleX = 1.4f,
-                        scaleY = 1.4f
+                        scaleX = 1.6f,
+                        scaleY = 1.6f
                     )
             )
         }
 
         Column(
             modifier = Modifier
-                .padding(20.dp)
+                .padding(24.dp)
                 .fillMaxWidth()
         ) {
             Row(
@@ -110,24 +111,27 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                 horizontalArrangement = Arrangement.Start
             ) {
                 Text(
-                    text = "Welcome ",
+                    text = "Sign ",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Back!",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "Up",
+                    color = appColorPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
             Row {
                 Text(
-                    text = "Continue your PetPal journey with us",
-                    color = MaterialTheme.colorScheme.secondary,
+                    text = "Create a new account to join\nour furry community",
+                    color = appColorSecondary,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Light
+                    fontWeight = FontWeight.Light,
+                    style = TextStyle(
+                        lineHeight = 16.sp
+                    )
                 )
             }
         }
@@ -135,17 +139,29 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
         Box(
             modifier = Modifier
                 .weight(3f)
-                .padding(10.dp)
+                .padding(20.dp)
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
+//            Spacer(modifier = Modifier.height(20.dp))
 
             Column(verticalArrangement = Arrangement.Center) {
+
+                UsernameInput(
+                    label = stringResource(id = R.string.label_username),
+                    icon = AppIcons.Username,
+                    currentValue = username,
+                    keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() }),
+                    onValueChange = { username = it }
+                    )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
                 EmailInput(
                     label = stringResource(id = R.string.label_email),
                     icon = AppIcons.Email,
                     currentValue = email,
                     keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
-                    onValueChange = { email = it }
+                    onValueChange = { email = it },
+                    focusRequester = emailFocusRequester
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -159,24 +175,11 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                     focusRequester = passwordFocusRequester
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "forgot password?",
-                    Modifier.clickable {
-                        navController.navigate(ROUTE_FORGOT_PASSWORD) {
-                            popUpTo(ROUTE_FORGOT_PASSWORD) { inclusive = true }
-                        }
-                    },
-                    color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
                 Button(
                     onClick = {
-                        viewModel?.login(email, password)
+                              viewModel?.signUp(username, email, password)
                     },
                     Modifier
                         .fillMaxWidth(fraction = 0.5f)
@@ -185,7 +188,11 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Box {
-                        Text(text = "Log In", Modifier.padding(8.dp))
+                        Text(
+                            text = "Continue",
+                            Modifier.padding(8.dp),
+                            color = MaterialTheme.colorScheme.background
+                        )
                     }
                 }
             }
@@ -199,17 +206,17 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Don't have an account?",
-                    color = appColorPrimaryLight
+                    text = "Already have an account?",
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Sign Up",
-                    color = appColorPrimaryLight,
+                    text = "Login",
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable {
-                            navController.navigate(ROUTE_SIGNUP) {
-                                popUpTo(ROUTE_SIGNUP)
+                            navController.navigate(ROUTE_LOGIN) {
+                                popUpTo(ROUTE_LOGIN)
                             }
                         }
                         .padding(5.dp)
@@ -217,7 +224,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
             }
         }
 
-        loginFlow?.value?.let {
+        signupFlow?.value?.let {
             when(it) {
                 is Resource.Failure -> {
                     val context = LocalContext.current
@@ -228,8 +235,8 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                 }
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
-                        navController.navigate(ROUTE_HOME) {
-                            popUpTo(ROUTE_HOME) { inclusive = true }
+                        navController.navigate(ROUTE_SIGNUP_DETAILED) {
+                            popUpTo(ROUTE_SIGNUP_DETAILED) { inclusive = true }
                         }
                     }
                 }
@@ -238,21 +245,18 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun LoginPreviewLight() {
+fun SignUpPreviewLight() {
     PetPalTheme {
-        LoginScreen(null, rememberNavController())
+        SignUpScreen(null, rememberNavController())
     }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun LoginPreviewDark() {
+fun SignUpPreviewDark() {
     PetPalTheme {
-        LoginScreen(null, rememberNavController())
+        SignUpScreen(null, rememberNavController())
     }
 }

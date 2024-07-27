@@ -1,8 +1,10 @@
-package com.luke.petpal.data
+package com.luke.petpal.domain.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.luke.petpal.data.repository.AuthRepository
+import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.utils.await
 import javax.inject.Inject
 
@@ -34,6 +36,10 @@ class AuthRepositoryImpl @Inject constructor(
             Resource.Failure(e)
         }
     }
+
+//    override suspend fun loginWithGoogle(idToken: String): Resource<FirebaseUser> {
+//
+//    }
 
     override suspend fun isEmailVerified(): Boolean? {
         return try {

@@ -1,4 +1,4 @@
-package com.luke.petpal.ui.screens
+package com.luke.petpal.presentation.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -23,10 +23,10 @@ import androidx.navigation.compose.rememberNavController
 import com.luke.petpal.R
 import com.luke.petpal.navigation.ROUTE_HOME
 import com.luke.petpal.navigation.ROUTE_LOGIN
-import com.luke.petpal.ui.auth.AuthViewModel
-import com.luke.petpal.ui.theme.AppTheme
-import com.luke.petpal.ui.theme.PetPalTheme
-import com.luke.petpal.ui.theme.spacing
+import com.luke.petpal.presentation.auth.AuthViewModel
+import com.luke.petpal.presentation.theme.AppTheme
+import com.luke.petpal.presentation.theme.PetPalTheme
+import com.luke.petpal.presentation.theme.spacing
 
 @Composable
 fun HomeScreen(viewModel: AuthViewModel?, navController: NavHostController) {

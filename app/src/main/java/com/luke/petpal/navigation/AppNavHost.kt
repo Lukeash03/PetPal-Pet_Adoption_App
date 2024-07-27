@@ -8,11 +8,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
-import com.luke.petpal.ui.screens.HomeScreen
-import com.luke.petpal.ui.auth.AuthViewModel
-import com.luke.petpal.ui.auth.ForgotPasswordScreen
-import com.luke.petpal.ui.auth.LoginScreen
-import com.luke.petpal.ui.auth.SignUpScreen
+import com.luke.petpal.presentation.screens.HomeScreen
+import com.luke.petpal.presentation.auth.AuthViewModel
+import com.luke.petpal.presentation.auth.ForgotPasswordScreen
+import com.luke.petpal.presentation.auth.LoginScreen
+import com.luke.petpal.presentation.auth.SignUpDetailScreen
+import com.luke.petpal.presentation.auth.SignUpScreen
 
 @Composable
 fun AppNavHost(
@@ -34,6 +35,9 @@ fun AppNavHost(
         }
         composable(ROUTE_FORGOT_PASSWORD) {
             ForgotPasswordScreen(viewModel = viewModel, navController = navController)
+        }
+        composable(ROUTE_SIGNUP_DETAILED) {
+            SignUpDetailScreen(viewModel = viewModel, navController = navController)
         }
     }
     NavHost(

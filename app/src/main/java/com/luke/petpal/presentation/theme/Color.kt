@@ -1,4 +1,4 @@
-package com.luke.petpal.ui.theme
+package com.luke.petpal.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

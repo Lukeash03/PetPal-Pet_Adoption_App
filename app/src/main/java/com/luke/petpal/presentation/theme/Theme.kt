@@ -1,12 +1,12 @@
-package com.luke.petpal.ui.theme
+package com.luke.petpal.presentation.theme
 
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -51,6 +51,7 @@ object AppIcons {
     val Password = Icons.Default.Lock
     val PasswordEyeVisible = Icons.Default.Visibility
     val PasswordEyeInvisible = Icons.Default.VisibilityOff
+    val map = Icons.Default.Map
 }
 
 @Composable

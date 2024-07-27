@@ -1,4 +1,4 @@
-package com.luke.petpal.data
+package com.luke.petpal.data.models
 
 import java.lang.Exception
 
