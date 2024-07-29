@@ -54,7 +54,6 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.luke.petpal.R
 import com.luke.petpal.navigation.ROUTE_HOME
-import com.luke.petpal.navigation.ROUTE_LOGIN
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import com.luke.petpal.presentation.theme.appColorSecondary

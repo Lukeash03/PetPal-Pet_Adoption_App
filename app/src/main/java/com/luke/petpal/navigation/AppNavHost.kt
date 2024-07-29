@@ -1,7 +1,9 @@
 package com.luke.petpal.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,6 +27,8 @@ fun AppNavHost(
 
     val navGraph: NavGraph = navController.createGraph(startDestination = startDestination) {
         composable(ROUTE_LOGIN) {
+            val state by viewModel.googleSignInFlow.collectAsStateWithLifecycle()
+
             LoginScreen(viewModel, navController = navController)
         }
         composable(ROUTE_SIGNUP) {

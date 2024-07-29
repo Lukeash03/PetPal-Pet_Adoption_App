@@ -1,5 +1,6 @@
 package com.luke.petpal.presentation.auth
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -8,13 +9,16 @@ import com.luke.petpal.data.models.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository
-): ViewModel() {
+    private val repository: AuthRepository,
+    private val googleAuthUIClient: GoogleAuthUIClient
+) : ViewModel() {
 
     private val _loginFlow = MutableStateFlow<Resource<FirebaseUser>?>(null)
     val loginFlow: StateFlow<Resource<FirebaseUser>?> = _loginFlow
@@ -27,6 +31,9 @@ class AuthViewModel @Inject constructor(
 
     private val _passwordResetFlow = MutableStateFlow<Resource<Unit>?>(null)
     val passwordResetFlow: StateFlow<Resource<Unit>?> = _passwordResetFlow
+
+    private val _googleSignInFlow = MutableStateFlow(SignInState())
+    val googleSignInFlow = _googleSignInFlow.asStateFlow()
 
     val currentUser: FirebaseUser?
         get() = repository.currentUser
@@ -69,8 +76,35 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout() {
-        repository.logout()
-        _loginFlow.value = null
-        _signUpFlow.value = null
+        viewModelScope.launch {
+            repository.logout()
+            googleAuthUIClient.signOut()
+            _loginFlow.value = null
+            _signUpFlow.value = null
+        }
     }
+
+    private fun onSignInResult(result: SignInResult) {
+        _googleSignInFlow.update {
+            it.copy(
+                isSignInSuccessful = result.data != null,
+                signInError = result.errorMessage
+            )
+        }
+    }
+
+    fun resetState() {
+        _googleSignInFlow.update { SignInState() }
+    }
+
+    fun triggerGoogleSignIn() = viewModelScope.launch {
+        val signInIntentSender = googleAuthUIClient.signIn()
+        _googleSignInFlow.update { it.copy(signInIntent = signInIntentSender) }
+    }
+
+    fun signInWithGoogle(intent: Intent) = viewModelScope.launch {
+        val result = googleAuthUIClient.signInWithIntent(intent)
+        onSignInResult(result)
+    }
+
 }

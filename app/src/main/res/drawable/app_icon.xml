@@ -1,0 +1,19 @@
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="50dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="50dp">
+
+    <group
+        android:name="animationGroup"
+        android:pivotX="12"
+        android:pivotY="12">
+        <path android:fillColor="#7ed0ec" android:pathData="M12,1.44L12,1.44A10.56,10.56 0,0 1,22.56 12L22.56,12A10.56,10.56 0,0 1,12 22.56L12,22.56A10.56,10.56 0,0 1,1.44 12L1.44,12A10.56,10.56 0,0 1,12 1.44z" android:strokeColor="#EA4A6A" android:strokeWidth="0"/>
+
+        <path android:fillColor="#00000000" android:pathData="M2,2h20v20h-20z" android:strokeColor="#EA4A6A" android:strokeWidth="0.0002"/>
+
+        <path android:fillColor="#EA4A6A" android:pathData="M13.9,10.4c1.3,0 2.1,-1.9 2.1,-3.1 0,-1 -0.5,-2.2 -1.5,-2.2 -1.3,0 -2.1,1.9 -2.1,3.1 0,1 0.5,2.2 1.5,2.2zM10.1,10.4c1,0 1.5,-1.2 1.5,-2.2C11.6,6.9 10.8,5 9.5,5 8.5,5 8,6.2 8,7.2c-0.1,1.3 0.7,3.2 2.1,3.2zM17.5,9.4c-1.3,0 -2.2,1.8 -2.2,3.1 0,0.9 0.4,1.8 1.3,1.8 1.3,0 2.2,-1.8 2.2,-3.1 0,-0.9 -0.5,-1.8 -1.3,-1.8zM8.8,12.5c0,-1.3 -1,-3.1 -2.2,-3.1 -0.9,0 -1.3,0.9 -1.3,1.8 0,1.3 1,3.1 2.2,3.1 0.9,0 1.3,-0.9 1.3,-1.8zM12,12.3c-2,0 -4.7,3.2 -4.7,5.4 0,1 0.7,1.3 1.5,1.3 1.2,0 2.1,-0.8 3.2,-0.8 1,0 1.9,0.8 3,0.8 0.8,0 1.7,-0.2 1.7,-1.3 0,-2.2 -2.7,-5.4 -4.7,-5.4z" android:strokeColor="#EA4A6A" android:strokeWidth="0.0002"/>
+    </group>
+
+</vector>

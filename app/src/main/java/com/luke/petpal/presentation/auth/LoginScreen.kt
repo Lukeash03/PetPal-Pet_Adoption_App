@@ -1,7 +1,11 @@
 package com.luke.petpal.presentation.auth
 
+import android.app.Activity
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +26,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -58,6 +64,7 @@ import com.luke.petpal.presentation.theme.AppIcons
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 
+
 @Composable
 fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
     var email by remember { mutableStateOf("") }
@@ -67,6 +74,18 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
 
     val passwordFocusRequester = FocusRequester()
     val focusManager: FocusManager = LocalFocusManager.current
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val intent = result.data
+            intent?.let {
+                viewModel?.signInWithGoogle(intent = it)
+            }
+        }
+    }
 
     Column(
         Modifier
@@ -139,7 +158,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
             modifier = Modifier
                 .weight(3f)
                 .padding(horizontal = 20.dp)
-                .padding(top = 20.dp),
+                .padding(top = 10.dp),
         ) {
 //            Spacer(modifier = Modifier.height(20.dp))
 
@@ -196,7 +215,24 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                         Text(text = "Log In", Modifier.padding(8.dp))
                     }
                 }
+
+                Divider(
+                    color = Color.Gray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                Button(
+                    onClick = {
+                        viewModel?.triggerGoogleSignIn()
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
+                    Text(text = "Sign in with google")
+                }
             }
+
+
         }
 
         Box(
@@ -225,17 +261,34 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
             }
         }
 
+        val googleSignInState = viewModel?.googleSignInFlow?.collectAsState()?.value
+        googleSignInState?.signInIntent?.let { intentSender ->
+            launcher.launch(IntentSenderRequest.Builder(intentSender).build())
+        }
+
+        googleSignInState?.isSignInSuccessful.let { isSuccessful ->
+            if (isSuccessful == true) {
+                navController.navigate(ROUTE_HOME)
+                viewModel?.resetState()
+            } else {
+                googleSignInState?.signInError?.let { errorMessage ->
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         loginFlow?.value?.let {
-            when(it) {
+            when (it) {
                 is Resource.Failure -> {
-                    val context = LocalContext.current
                     LaunchedEffect(it) {
                         Toast.makeText(context, it.exception.message, Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 Resource.Loading -> {
                     CircularProgressIndicator(modifier = Modifier)
                 }
+
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
                         navController.navigate(ROUTE_HOME) {
@@ -245,6 +298,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                 }
             }
         }
+
     }
 }
 

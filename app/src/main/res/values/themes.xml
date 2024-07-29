@@ -2,4 +2,12 @@
 <resources>
 
     <style name="Theme.PetPal" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen" >
+        <item name="windowSplashScreenBackground">@color/app_primary_color</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/avd_petpal</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.PetPal</item>
+    </style>
+
 </resources>
