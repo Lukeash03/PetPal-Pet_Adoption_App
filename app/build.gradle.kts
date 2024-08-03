@@ -109,4 +109,5 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-base:17.6.0")
 
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
 }

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.luke.petpal.R
 import com.luke.petpal.presentation.components.EmailInput
 import com.luke.petpal.presentation.components.PasswordInput
@@ -66,7 +67,11 @@ import com.luke.petpal.presentation.theme.appColorPrimary
 
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
+fun LoginScreen(
+    viewModel: AuthViewModel?,
+    navController: NavController,
+    splashScreenCompleted: Boolean
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -87,6 +92,20 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
         }
     }
 
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = MaterialTheme.colorScheme.background
+
+    LaunchedEffect(splashScreenCompleted) {
+        if (splashScreenCompleted) {
+            systemUiController.setStatusBarColor(
+                color = statusBarColor,
+            )
+            systemUiController.setNavigationBarColor(
+                color = statusBarColor,
+            )
+        }
+    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -98,7 +117,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
 
         Box(
             modifier = Modifier
-                .weight(3f),
+                .weight(2.5f),
 //                .padding(bottom = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
@@ -163,7 +182,8 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
 //            Spacer(modifier = Modifier.height(20.dp))
 
             Column(
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround
             ) {
                 EmailInput(
                     label = stringResource(id = R.string.label_email),
@@ -310,7 +330,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
 @Composable
 fun LoginPreviewLight() {
     PetPalTheme {
-        LoginScreen(null, rememberNavController())
+        LoginScreen(null, rememberNavController(), true)
     }
 }
 
@@ -318,6 +338,6 @@ fun LoginPreviewLight() {
 @Composable
 fun LoginPreviewDark() {
     PetPalTheme {
-        LoginScreen(null, rememberNavController())
+        LoginScreen(null, rememberNavController(), true)
     }
 }

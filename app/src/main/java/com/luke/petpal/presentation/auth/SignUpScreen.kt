@@ -76,6 +76,15 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
 
     val state = viewModel?.state
     val context = LocalContext.current
+    LaunchedEffect(context) {
+        viewModel?.validationEvents?.collect { event ->
+            when (event) {
+                is AuthViewModel.ValidationEvent.Success -> {
+                    viewModel.signUp(username, email, password)
+                }
+            }
+        }
+    }
 
     Column(
         Modifier
@@ -88,7 +97,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
 
         Box(
             modifier = Modifier
-                .weight(3f),
+                .weight(2.5f),
             contentAlignment = Alignment.Center,
         ) {
             Image(
@@ -147,7 +156,10 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
         ) {
 //            Spacer(modifier = Modifier.height(20.dp))
 
-            Column(verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Top
+            ) {
 
                 UsernameInput(
                     label = stringResource(id = R.string.label_username),
@@ -155,7 +167,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     currentValue = username,
                     keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() }),
                     onValueChange = { username = it }
-                    )
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -164,11 +176,24 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     icon = AppIcons.Email,
                     currentValue = email,
                     keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        viewModel?.onEvent(RegistrationFormEvent.EmailChanged(it))
+                    },
                     focusRequester = emailFocusRequester
                 )
+                if (state?.emailError != null) {
+                    Text(
+                        text = state.emailError,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                if (state?.emailError == null) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
 
                 PasswordInput(
                     label = stringResource(id = R.string.label_password),
@@ -176,22 +201,29 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     currentValue = password,
                     isError = state?.passwordError != null,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        viewModel?.onEvent(RegistrationFormEvent.PasswordChanged(it))
+                    },
                     focusRequester = passwordFocusRequester
                 )
                 if (state?.passwordError != null) {
                     Text(
                         text = state.passwordError,
+                        fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.align(Alignment.End)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                if (state?.passwordError == null) {
+                    Spacer(modifier = Modifier.height(30.dp))
+                }
 
                 Button(
                     onClick = {
-                              viewModel?.signUp(username, email, password)
+//                        viewModel?.signUp(username, email, password)
+                              viewModel?.onEvent(RegistrationFormEvent.Submit)
                     },
                     Modifier
                         .fillMaxWidth(fraction = 0.5f)
@@ -237,14 +269,15 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
         }
 
         signupFlow?.value?.let {
-            when(it) {
+            when (it) {
                 is Resource.Failure -> {
-                    val context = LocalContext.current
                     Toast.makeText(context, it.exception.message, Toast.LENGTH_SHORT).show()
                 }
+
                 Resource.Loading -> {
                     CircularProgressIndicator(modifier = Modifier)
                 }
+
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
                         navController.navigate(ROUTE_SIGNUP_DETAILED) {

@@ -1,5 +1,6 @@
 package com.luke.petpal.navigation
 
+import android.window.SplashScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,14 +23,15 @@ fun AppNavHost(
     viewModel: AuthViewModel,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = ROUTE_LOGIN
+    startDestination: String = ROUTE_LOGIN,
+    splashScreenCompleted: Boolean
 ) {
 
     val navGraph: NavGraph = navController.createGraph(startDestination = startDestination) {
         composable(ROUTE_LOGIN) {
             val state by viewModel.googleSignInFlow.collectAsStateWithLifecycle()
 
-            LoginScreen(viewModel, navController = navController)
+            LoginScreen(viewModel, navController = navController, splashScreenCompleted)
         }
         composable(ROUTE_SIGNUP) {
             SignUpScreen(viewModel, navController = navController)

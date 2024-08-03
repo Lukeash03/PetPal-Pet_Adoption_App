@@ -11,6 +11,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -26,6 +35,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        var splashScreenCompleted by mutableStateOf(false)
+
         val splashScreen = installSplashScreen()
         splashScreen.apply {
             setOnExitAnimationListener { screen ->
@@ -50,14 +62,20 @@ class MainActivity : ComponentActivity() {
                 zoomX.start()
                 zoomY.start()
 
-                zoomX.doOnEnd { screen.remove() }
-                zoomY.doOnEnd { screen.remove() }
+                zoomX.doOnEnd {
+                    screen.remove()
+                    splashScreenCompleted = true
+                }
+                zoomY.doOnEnd {
+                    screen.remove()
+                    splashScreenCompleted = true
+                }
             }
         }
 
         setContent {
             PetPalTheme {
-                AppNavHost(viewmodel)
+                AppNavHost(viewmodel, splashScreenCompleted = splashScreenCompleted)
             }
         }
     }

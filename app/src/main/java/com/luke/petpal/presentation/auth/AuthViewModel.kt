@@ -113,6 +113,7 @@ class AuthViewModel @Inject constructor(
             )
             return
         }
+
         viewModelScope.launch {
             validationEventChannel.send(ValidationEvent.Success)
         }
