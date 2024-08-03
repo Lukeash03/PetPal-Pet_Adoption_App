@@ -2,8 +2,10 @@ package com.luke.petpal.presentation.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,10 +35,11 @@ fun HomeScreen(viewModel: AuthViewModel?, navController: NavHostController) {
     val spacing = MaterialTheme.spacing
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(spacing.medium)
-            .padding(top = spacing.extraLarge),
+            .fillMaxSize()
+//            .wrapContentHeight()
+//            .padding(spacing.medium)
+//            .padding(top = spacing.extraLarge)
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 

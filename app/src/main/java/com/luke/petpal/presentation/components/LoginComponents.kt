@@ -1,11 +1,15 @@
 package com.luke.petpal.presentation.components
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -25,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import com.luke.petpal.presentation.theme.AppIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,6 +116,7 @@ fun PasswordInput(
     label: String,
     icon: ImageVector,
     currentValue: String,
+    isError: Boolean,
     focusRequester: FocusRequester? = null,
     keyboardActions: KeyboardActions,
     onValueChange: (String) -> Unit
@@ -121,6 +127,7 @@ fun PasswordInput(
     TextField(
         value = currentValue,
         onValueChange = onValueChange,
+        isError = isError,
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester ?: FocusRequester()),
@@ -160,4 +167,6 @@ fun PasswordInput(
             unfocusedIndicatorColor = Color.Transparent
         )
     )
+
+
 }

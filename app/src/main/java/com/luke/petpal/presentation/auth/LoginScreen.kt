@@ -179,6 +179,7 @@ fun LoginScreen(viewModel: AuthViewModel?, navController: NavController) {
                     label = stringResource(id = R.string.label_password),
                     icon = AppIcons.Password,
                     currentValue = password,
+                    isError = false,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = { password = it },
                     focusRequester = passwordFocusRequester

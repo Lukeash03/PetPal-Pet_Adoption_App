@@ -1,15 +1,20 @@
 package com.luke.petpal.domain.repository
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.utils.await
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : AuthRepository {
 
     override val currentUser: FirebaseUser?
@@ -37,10 +42,6 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-//    override suspend fun loginWithGoogle(idToken: String): Resource<FirebaseUser> {
-//
-//    }
-
     override suspend fun isEmailVerified(): Boolean? {
         return try {
             val user = firebaseAuth.currentUser
@@ -65,6 +66,37 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun sendPasswordResetEmail(email: String): Resource<Unit> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun uploadProfileImage(uri: Uri): Resource<String> {
+        return try {
+            val storageRef = storage.reference.child("profileImages/${firebaseAuth.currentUser?.uid}")
+            val uploadTask = storageRef.putFile(uri).await()
+            val downloadUrl = uploadTask.storage.downloadUrl.await()
+            Resource.Success(downloadUrl.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun updateProfileImageUrl(url: String): Resource<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+            val userProfileChangeRequest = UserProfileChangeRequest.Builder()
+                .setPhotoUri(Uri.parse(url))
+                .build()
+            user?.updateProfile(userProfileChangeRequest)?.await()
+
+            user?.uid?.let { uid ->
+                firestore.collection("users").document(uid).update("profileImageUrl", url).await()
+            }
+
             Resource.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()

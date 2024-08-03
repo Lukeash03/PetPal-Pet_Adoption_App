@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -87,6 +88,9 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.firestore.ktx)
+
     implementation(libs.play.services.auth)
 
     // Dagger hilt
@@ -96,4 +100,13 @@ dependencies {
 
     // Splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    // Biometric
+    implementation(libs.androidx.biometric)
+
+    // Places API
+    implementation(libs.places)
+
+    implementation("com.google.android.gms:play-services-base:17.6.0")
+
 }

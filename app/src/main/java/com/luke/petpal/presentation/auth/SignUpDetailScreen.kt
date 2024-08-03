@@ -2,7 +2,9 @@ package com.luke.petpal.presentation.auth
 
 import android.content.res.Configuration
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,26 +50,34 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.model.Place
 import com.luke.petpal.R
+import com.luke.petpal.data.models.Resource
 import com.luke.petpal.navigation.ROUTE_HOME
+import com.luke.petpal.presentation.components.PlacesAutocomplete
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import com.luke.petpal.presentation.theme.appColorSecondary
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val context = LocalContext.current
-
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
+        contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri: Uri? -> imageUri = uri }
     )
+
+    val context = LocalContext.current
+    val uploadImageResult = viewModel?.uploadImageResult?.collectAsState()
+    val updateProfileImageResult = viewModel?.updateProfileImageResult?.collectAsState()
 
     var location by remember { mutableStateOf(TextFieldValue()) }
     var selectedLocation by remember { mutableStateOf<String?>(null) }
@@ -128,14 +139,20 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
             imageUri?.let { uri ->
                 Image(
                     painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = uri).apply(block = fun ImageRequest.Builder.() {
-                            transformations(CircleCropTransformation())
-                        }).build()
+                        ImageRequest.Builder(LocalContext.current).data(data = uri)
+                            .apply(block = fun ImageRequest.Builder.() {
+                                transformations(CircleCropTransformation())
+                            }).build()
                     ),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(150.dp - (4f * 2).dp)
+                        .size(200.dp - (4f * 2).dp)
+                        .clickable {
+                            imagePickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
                 )
             } ?: Image(
                 painter = painterResource(id = R.drawable.bx_camera),
@@ -143,6 +160,11 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(150.dp - (4f * 2).dp)
+                    .clickable {
+                        imagePickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
             )
         }
 
@@ -153,6 +175,14 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+//            PlacesAutocomplete(
+//                modifier = Modifier.padding(top = 16.dp),
+//                onPlaceSelected = { place: Place ->
+//                    viewModel?.updateLocation(place)
+//                },
+//                onError = { status: Status ->
+//
+//                })
             OutlinedTextField(
                 value = location,
                 trailingIcon = {
@@ -183,6 +213,36 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
 
                 Button(
                     onClick = {
+                        imageUri?.let { uri ->
+                            viewModel?.viewModelScope?.launch {
+                                viewModel.uploadProfileImage(uri)
+                                viewModel.uploadImageResult.collect { uploadResult ->
+                                    if (uploadResult is Resource.Success) {
+                                        val imageUrl = uploadResult.result
+                                        viewModel.updateProfileImageUrl(imageUrl)
+                                        viewModel.updateProfileImageResult.collect { updateResult ->
+                                            if (updateResult is Resource.Success) {
+                                                navController.navigate(ROUTE_HOME) {
+                                                    popUpTo(ROUTE_HOME)
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Failed to update profile image URL",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Failed to upload image",
+                                            Toast.LENGTH_LONG
+                                        )
+                                    }
+                                }
+                            }
+                        }
 //                    viewModel?.signUp(username, email, password)
                     },
                     Modifier
@@ -220,8 +280,6 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
 
             }
         }
-
-
     }
 }
 

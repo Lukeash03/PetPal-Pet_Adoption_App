@@ -8,4 +8,6 @@
     <string name="logout">Logout</string>
 
     <string name="web_client_id">965804874509-edsr0imhpd72bnk8ighlfrm26f9nv13s.apps.googleusercontent.com</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

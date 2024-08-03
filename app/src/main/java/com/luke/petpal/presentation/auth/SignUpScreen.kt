@@ -66,12 +66,16 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val emailFocusRequester = FocusRequester()
     val passwordFocusRequester = FocusRequester()
     val focusManager: FocusManager = LocalFocusManager.current
 
     val signupFlow = viewModel?.signUpFlow?.collectAsState()
+
+    val state = viewModel?.state
+    val context = LocalContext.current
 
     Column(
         Modifier
@@ -170,10 +174,18 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     label = stringResource(id = R.string.label_password),
                     icon = AppIcons.Password,
                     currentValue = password,
+                    isError = state?.passwordError != null,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = { password = it },
                     focusRequester = passwordFocusRequester
                 )
+                if (state?.passwordError != null) {
+                    Text(
+                        text = state.passwordError,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(30.dp))
 
