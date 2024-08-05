@@ -73,11 +73,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signUp(username: String, email: String, password: String) = viewModelScope.launch {
-//        val passwordValidationResult = validatePassword(password)
-//        if (!passwordValidationResult.isValid) {
-////            _signUpFlow.value = Resource.Failure(PasswordValidationException(passwordValidationResult.errorMessage ?: "Password does not meet requirements"))
-//            return@launch
-//        }
         _signUpFlow.value = Resource.Loading
         val result = repository.signUp(username, email, password)
         _signUpFlow.value = result
@@ -118,34 +113,6 @@ class AuthViewModel @Inject constructor(
             validationEventChannel.send(ValidationEvent.Success)
         }
     }
-
-//    private fun validatePassword(password: String): PasswordValidationResult {
-//        val minLength = 6
-//        val hasUppercase = password.any { it.isUpperCase() }
-//        val hasLowercase = password.any { it.isLowerCase() }
-//        val hasDigit = password.any { it.isDigit() }
-//
-//        return when {
-//            password.length < minLength -> PasswordValidationResult(
-//                isValid = false,
-//                errorMessage = "Password must be at least $minLength characters long"
-//            )
-//            !hasUppercase -> PasswordValidationResult(
-//                isValid = false,
-//                errorMessage = "Password must contain at least one uppercase letter"
-//            )
-//            !hasLowercase -> PasswordValidationResult(
-//                isValid = false,
-//                errorMessage = "Password must contain at least one lowercase letter"
-//            )
-//            !hasDigit -> PasswordValidationResult(
-//                isValid = false,
-//                errorMessage = "Password must contain at least one digit"
-//            )
-//
-//            else -> PasswordValidationResult(isValid = true)
-//        }
-//    }
 
 //    private fun isEmailVerified() = viewModelScope.launch {
 //        _isEmailVerifiedFlow.value = try {

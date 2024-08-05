@@ -36,9 +36,6 @@ fun HomeScreen(viewModel: AuthViewModel?, navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-//            .wrapContentHeight()
-//            .padding(spacing.medium)
-//            .padding(top = spacing.extraLarge)
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

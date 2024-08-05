@@ -46,6 +46,7 @@ fun AppNavHost(
             SignUpDetailScreen(viewModel = viewModel, navController = navController)
         }
     }
+
     NavHost(
         modifier = modifier,
         navController = navController,
