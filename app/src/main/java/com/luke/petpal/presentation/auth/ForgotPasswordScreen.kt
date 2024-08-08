@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.navigation.ROUTE_LOGIN
+import com.luke.petpal.navigation.AuthScreen
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 
@@ -104,8 +103,8 @@ fun ForgotPasswordScreen(
                     // Navigate back to login screen
                     LaunchedEffect(Unit) {
                         viewModel.resetPasswordResetFlow()
-                        navController.navigate(ROUTE_LOGIN) {
-                            popUpTo("login") { inclusive = true }
+                        navController.navigate(AuthScreen.Login.route) {
+                            popUpTo(AuthScreen.Login.route) { inclusive = true }
                         }
                     }
                 }

@@ -1,10 +1,8 @@
 package com.luke.petpal
 
 import android.animation.ObjectAnimator
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowInsetsController
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +21,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import com.luke.petpal.navigation.AppNavHost
+import androidx.navigation.compose.rememberNavController
+import com.luke.petpal.navigation.RootNavGraph
 import com.luke.petpal.presentation.auth.AuthViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -75,7 +74,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PetPalTheme {
-                AppNavHost(viewmodel, splashScreenCompleted = splashScreenCompleted)
+                RootNavGraph(
+                    viewModel = viewmodel,
+                    navController = rememberNavController(),
+                    splashScreenCompleted = splashScreenCompleted
+                )
             }
         }
     }

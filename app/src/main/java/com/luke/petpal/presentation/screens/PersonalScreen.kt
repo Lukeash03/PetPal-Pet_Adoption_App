@@ -1,4 +1,4 @@
-package com.luke.petpal.presentation.auth
+package com.luke.petpal.presentation.screens
 
 import android.content.res.Configuration
 import android.net.Uri
@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,14 +46,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -60,13 +58,18 @@ import coil.transform.CircleCropTransformation
 import com.luke.petpal.R
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.navigation.Graph
+import com.luke.petpal.presentation.auth.AuthViewModel
+import com.luke.petpal.presentation.auth.SignUpDetailScreen
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import com.luke.petpal.presentation.theme.appColorSecondary
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) {
+fun PersonalScreen(
+    viewModel: AuthViewModel?
+) {
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -74,11 +77,13 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
     )
 
     val context = LocalContext.current
-    val uploadImageResult = viewModel?.uploadImageResult?.collectAsState()
-    val updateProfileImageResult = viewModel?.updateProfileImageResult?.collectAsState()
 
-    var location by remember { mutableStateOf(TextFieldValue()) }
-    var selectedLocation by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        viewModel?.fetchProfileImageUrl()
+    }
+
+    val profileImageUrl by viewModel?.profileImageUrl?.collectAsState() ?: remember { mutableStateOf(Resource.Loading) }
+//    val profileImageUrl = viewModel?.profileImageUrl?.collectAsState()
 
     Column(
         modifier = Modifier
@@ -97,28 +102,14 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
         ) {
 
             Row(
-                modifier = Modifier,
-                horizontalArrangement = Arrangement.Start
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Sign ",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = "Profile",
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Up",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Row {
-                Text(
-                    text = "Complete your profile so we can know you better",
-                    color = appColorSecondary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Light,
+                    fontWeight = FontWeight.ExtraBold,
                     style = TextStyle(
                         lineHeight = 16.sp
                     )
@@ -129,80 +120,95 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(200.dp) // Size of the circular image holder
+                .size(200.dp)
                 .clip(CircleShape)
                 .background(Color.White)
                 .border(5.dp, appColorPrimary, CircleShape)
         ) {
-            imageUri?.let { uri ->
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = uri)
-                            .apply(block = fun ImageRequest.Builder.() {
-                                transformations(CircleCropTransformation())
-                            }).build()
-                    ),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(200.dp - (4f * 2).dp)
-                        .clickable {
-                            imagePickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }
-                )
-            } ?: Image(
-                painter = painterResource(id = R.drawable.bx_camera),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(150.dp - (4f * 2).dp)
-                    .clickable {
-                        imagePickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-//            PlacesAutocomplete(
-//                modifier = Modifier.padding(top = 16.dp),
-//                onPlaceSelected = { place: Place ->
-//                    viewModel?.updateLocation(place)
-//                },
-//                onError = { status: Status ->
-//
-//                })
-            OutlinedTextField(
-                value = location,
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.placeholder),
-                        contentDescription = "Choose on map",
-                        Modifier
-                            .size(24.dp)
+            when (profileImageUrl) {
+                is Resource.Loading -> {
+                    // Show a loading indicator if needed
+                }
+                is Resource.Success -> {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current).data(data = (profileImageUrl as Resource.Success<String>).result)
+                                .apply {
+                                    transformations(CircleCropTransformation())
+                                }
+                                .build()
+                        ),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(200.dp - (4f * 2).dp)
+                            .clickable {
+                                imagePickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }
                     )
-                },
-                shape = RoundedCornerShape(10.dp),
-                onValueChange = { location = it },
-                label = { Text("Enter Location") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+                }
+                is Resource.Failure -> {
+                    // Handle the error state
+                    Image(
+                        painter = painterResource(id = R.drawable.bx_camera),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(150.dp - (4f * 2).dp)
+                            .clickable {
+                                imagePickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }
+                    )
+                }
+            }
         }
+
+//        Box(
+//            contentAlignment = Alignment.Center,
+//            modifier = Modifier
+//                .size(200.dp) // Size of the circular image holder
+//                .clip(CircleShape)
+//                .background(Color.White)
+//                .border(5.dp, appColorPrimary, CircleShape)
+//        ) {
+//            imageUri?.let { uri ->
+//                Image(
+//                    painter = rememberAsyncImagePainter(
+//                        ImageRequest.Builder(LocalContext.current).data(data = uri)
+//                            .apply(block = fun ImageRequest.Builder.() {
+//                                transformations(CircleCropTransformation())
+//                            }).build()
+//                    ),
+//                    contentDescription = null,
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier
+//                        .size(200.dp - (4f * 2).dp)
+//                        .clickable {
+//                            imagePickerLauncher.launch(
+//                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+//                            )
+//                        }
+//                )
+//            } ?: Image(
+//                painter = painterResource(id = R.drawable.bx_camera),
+//                contentDescription = null,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .size(150.dp - (4f * 2).dp)
+//                    .clickable {
+//                        imagePickerLauncher.launch(
+//                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+//                        )
+//                    }
+//            )
+//        }
+
 
         Box(
-//            modifier = Modifier.weight(0.5f),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -220,9 +226,11 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                                         viewModel.updateProfileImageUrl(imageUrl)
                                         viewModel.updateProfileImageResult.collect { updateResult ->
                                             if (updateResult is Resource.Success) {
-                                                navController.navigate(Graph.HOME) {
-                                                    popUpTo(Graph.HOME)
-                                                }
+                                                Toast.makeText(
+                                                    context,
+                                                    "Updated profile image URL",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
                                             } else {
                                                 Toast.makeText(
                                                     context,
@@ -259,23 +267,6 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                selectedLocation?.let {
-                    Text("Selected Location: $it", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                Text(
-                    text = "I'll do this later",
-                    textDecoration = TextDecoration.Underline,
-                    color = appColorPrimary,
-                    fontWeight = FontWeight.Normal,
-                    modifier = Modifier
-                        .clickable {
-                            navController.navigate(Graph.HOME) {
-                                popUpTo(Graph.HOME)
-                            }
-                        }
-                )
-
             }
         }
     }
@@ -283,16 +274,16 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
-fun SignUpDetailPreviewLight() {
+fun PersonalScreenPreviewLight() {
     PetPalTheme {
-        SignUpDetailScreen(null, rememberNavController())
+        PersonalScreen(null)
     }
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun SignUpDetailPreviewDark() {
+fun PersonalScreenPreviewDark() {
     PetPalTheme {
-        SignUpDetailScreen(null, rememberNavController())
+        PersonalScreen(null)
     }
 }

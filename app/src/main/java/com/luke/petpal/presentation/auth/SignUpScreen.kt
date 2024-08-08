@@ -53,9 +53,8 @@ import com.luke.petpal.presentation.components.EmailInput
 import com.luke.petpal.presentation.components.PasswordInput
 import com.luke.petpal.presentation.components.UsernameInput
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.navigation.ROUTE_HOME
-import com.luke.petpal.navigation.ROUTE_LOGIN
-import com.luke.petpal.navigation.ROUTE_SIGNUP_DETAILED
+import com.luke.petpal.navigation.AuthScreen
+import com.luke.petpal.presentation.auth.validation.RegistrationFormEvent
 import com.luke.petpal.presentation.theme.AppIcons
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
@@ -223,7 +222,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                 Button(
                     onClick = {
 //                        viewModel?.signUp(username, email, password)
-                              viewModel?.onEvent(RegistrationFormEvent.Submit)
+                        viewModel?.onEvent(RegistrationFormEvent.Submit)
                     },
                     Modifier
                         .fillMaxWidth(fraction = 0.5f)
@@ -259,8 +258,8 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable {
-                            navController.navigate(ROUTE_LOGIN) {
-                                popUpTo(ROUTE_LOGIN)
+                            navController.navigate(AuthScreen.Login.route) {
+                                popUpTo(AuthScreen.Login.route)
                             }
                         }
                         .padding(5.dp)
@@ -280,8 +279,8 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
 
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
-                        navController.navigate(ROUTE_SIGNUP_DETAILED) {
-                            popUpTo(ROUTE_SIGNUP_DETAILED) { inclusive = true }
+                        navController.navigate(AuthScreen.SignUpDetailed.route) {
+                            popUpTo(AuthScreen.SignUpDetailed.route) { inclusive = true }
                         }
                     }
                 }

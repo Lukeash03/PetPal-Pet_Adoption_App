@@ -1,4 +1,4 @@
-package com.luke.petpal.presentation.auth
+package com.luke.petpal.presentation.auth.validation
 
 sealed class RegistrationFormEvent {
     data class EmailChanged(val email: String) : RegistrationFormEvent()

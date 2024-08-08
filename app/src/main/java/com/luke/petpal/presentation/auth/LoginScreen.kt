@@ -58,9 +58,8 @@ import com.luke.petpal.R
 import com.luke.petpal.presentation.components.EmailInput
 import com.luke.petpal.presentation.components.PasswordInput
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.navigation.ROUTE_FORGOT_PASSWORD
-import com.luke.petpal.navigation.ROUTE_HOME
-import com.luke.petpal.navigation.ROUTE_SIGNUP
+import com.luke.petpal.navigation.AuthScreen
+import com.luke.petpal.navigation.Graph
 import com.luke.petpal.presentation.theme.AppIcons
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
@@ -212,8 +211,8 @@ fun LoginScreen(
                     Modifier
                         .padding(start = 8.dp)
                         .clickable {
-                            navController.navigate(ROUTE_FORGOT_PASSWORD) {
-                                popUpTo(ROUTE_FORGOT_PASSWORD) { inclusive = true }
+                            navController.navigate(AuthScreen.Forgot.route) {
+                                popUpTo(AuthScreen.Forgot.route) { inclusive = true }
                             }
                         },
                     color = MaterialTheme.colorScheme.primary,
@@ -273,8 +272,8 @@ fun LoginScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable {
-                            navController.navigate(ROUTE_SIGNUP) {
-                                popUpTo(ROUTE_SIGNUP)
+                            navController.navigate(AuthScreen.SignUp.route) {
+                                popUpTo(AuthScreen.SignUp.route)
                             }
                         }
                         .padding(5.dp)
@@ -289,7 +288,7 @@ fun LoginScreen(
 
         googleSignInState?.isSignInSuccessful.let { isSuccessful ->
             if (isSuccessful == true) {
-                navController.navigate(ROUTE_HOME)
+                navController.navigate(Graph.HOME)
                 viewModel?.resetState()
             } else {
                 googleSignInState?.signInError?.let { errorMessage ->
@@ -312,8 +311,8 @@ fun LoginScreen(
 
                 is Resource.Success -> {
                     LaunchedEffect(Unit) {
-                        navController.navigate(ROUTE_HOME) {
-                            popUpTo(ROUTE_HOME) { inclusive = true }
+                        navController.navigate(Graph.HOME) {
+                            popUpTo(Graph.HOME) { inclusive = true }
                         }
                     }
                 }
@@ -323,10 +322,7 @@ fun LoginScreen(
     }
 }
 
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun LoginPreviewLight() {
     PetPalTheme {

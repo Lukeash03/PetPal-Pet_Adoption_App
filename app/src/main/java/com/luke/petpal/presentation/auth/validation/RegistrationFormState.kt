@@ -1,4 +1,4 @@
-package com.luke.petpal.presentation.auth
+package com.luke.petpal.presentation.auth.validation
 
 data class RegistrationFormState(
     val email: String = "",

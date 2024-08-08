@@ -1,4 +1,4 @@
-package com.luke.petpal.presentation.auth
+package com.luke.petpal.presentation.auth.googlesignin
 
 import android.content.IntentSender
 

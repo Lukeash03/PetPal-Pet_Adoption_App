@@ -9,7 +9,7 @@ import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.domain.repository.AuthRepositoryImpl
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
-import com.luke.petpal.presentation.auth.GoogleAuthUIClient
+import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

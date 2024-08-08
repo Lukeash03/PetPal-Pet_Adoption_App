@@ -1,131 +1,194 @@
 package com.luke.petpal.presentation.screens
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Button
+import android.util.Log
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults.containerColor
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.luke.petpal.BottomBarScreen
 import com.luke.petpal.R
-import com.luke.petpal.navigation.ROUTE_HOME
-import com.luke.petpal.navigation.ROUTE_LOGIN
+import com.luke.petpal.navigation.AuthScreen
+import com.luke.petpal.navigation.Graph
+import com.luke.petpal.navigation.HomeNavGraph
 import com.luke.petpal.presentation.auth.AuthViewModel
 import com.luke.petpal.presentation.theme.AppTheme
 import com.luke.petpal.presentation.theme.PetPalTheme
-import com.luke.petpal.presentation.theme.spacing
+import com.luke.petpal.presentation.theme.appColorPrimary
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun HomeScreen(
+    viewModel: AuthViewModel?,
+    navController: NavHostController = rememberNavController(),
+    logout: () -> Unit
+) {
+
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = appColorPrimary
+
+    LaunchedEffect(Unit) {
+        Log.d("HomeScreen", "Setting status bar and navigation bar color")
+        systemUiController.setStatusBarColor(
+            color = statusBarColor,
+        )
+        systemUiController.setNavigationBarColor(
+            color = statusBarColor,
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "")
+                    }
+                },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        fontFamily = FontFamily.Cursive,
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel?.logout()
+
+                            logout()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(12.dp)
+                )
+            )
+        },
+        bottomBar = {
+            BottomBar(navController = navController)
+        },
+        floatingActionButton = {
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
+            if (currentRoute == BottomBarScreen.Home.route) {
+                FloatingActionButton(
+                    onClick = { }
+                ) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+                }
+            }
+        }
+    ) {
+        HomeNavGraph(navController = navController, paddingValues = it, viewModel = viewModel)
+    }
+
+}
 
 @Composable
-fun HomeScreen(viewModel: AuthViewModel?, navController: NavHostController) {
-    val spacing = MaterialTheme.spacing
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+fun BottomBar(navController: NavHostController) {
+    val screens = listOf(
+        BottomBarScreen.Home,
+        BottomBarScreen.Liked,
+        BottomBarScreen.Chat,
+        BottomBarScreen.Personal,
+    )
 
-        Text(
-            text = stringResource(id = R.string.welcome_back),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-        Text(
-            text = stringResource(id = R.string.name),
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.lab_1),
-            contentDescription = "",
-            modifier = Modifier.size(128.dp)
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(spacing.medium)
+    val bottomBarDestination = screens.any { it.route == currentDestination?.route }
+    if (bottomBarDestination) {
+        NavigationBar(
+            modifier = Modifier,
+            containerColor = appColorPrimary,
+            contentColor = MaterialTheme.colorScheme.contentColorFor(containerColor),
+//            tonalElevation = NavigationBarDefaults.Elevation,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.name),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(0.3f),
-                    color = MaterialTheme.colorScheme.onSurface
+            screens.forEach { screen ->
+                AddItem(
+                    screen = screen,
+                    currentDestination = currentDestination,
+                    navController = navController
                 )
-
-                Text(
-                    text = viewModel?.currentUser?.displayName ?: "",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(0.7f),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.label_email),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(0.3f),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = viewModel?.currentUser?.email ?: "",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(0.7f),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Button(
-                onClick = {
-                    viewModel?.logout()
-                    navController.navigate(ROUTE_LOGIN) {
-                        popUpTo(ROUTE_HOME) { inclusive = true }
-                    }
-                          },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = spacing.extraLarge)
-            ) {
-                Text(text = stringResource(id = R.string.logout))
             }
         }
     }
+}
+
+@Composable
+fun RowScope.AddItem(
+    screen: BottomBarScreen,
+    currentDestination: NavDestination?,
+    navController: NavHostController
+) {
+    NavigationBarItem(
+        modifier = Modifier
+//            .padding(vertical = 4.dp)
+        ,
+//        label = {
+//            Text(text = screen.title)
+//        },
+        icon = {
+            Icon(
+                imageVector = screen.icon,
+                contentDescription = "Navigation Icon"
+            )
+        },
+        selected = currentDestination?.hierarchy?.any {
+            it.route == screen.route
+        } == true,
+        onClick = {
+            navController.navigate(screen.route) {
+                popUpTo(navController.graph.findStartDestination().id)
+                launchSingleTop = true
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun HomeScreenPreviewLight() {
     PetPalTheme {
-        HomeScreen(null, rememberNavController())
+        HomeScreen(null, rememberNavController()) { }
     }
 }
 
@@ -133,6 +196,6 @@ fun HomeScreenPreviewLight() {
 @Composable
 fun HomeScreenPreviewDark() {
     AppTheme {
-        HomeScreen(null, rememberNavController())
+        HomeScreen(null, rememberNavController()) { }
     }
 }

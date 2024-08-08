@@ -1,4 +1,4 @@
-package com.luke.petpal.presentation.auth
+package com.luke.petpal.presentation.auth.googlesignin
 
 data class SignInResult(
     val data: UserData?,

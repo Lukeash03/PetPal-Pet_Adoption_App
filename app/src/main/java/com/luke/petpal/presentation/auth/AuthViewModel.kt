@@ -2,6 +2,7 @@ package com.luke.petpal.presentation.auth
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +14,11 @@ import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
+import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
+import com.luke.petpal.presentation.auth.googlesignin.SignInResult
+import com.luke.petpal.presentation.auth.googlesignin.SignInState
+import com.luke.petpal.presentation.auth.validation.RegistrationFormEvent
+import com.luke.petpal.presentation.auth.validation.RegistrationFormState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +55,9 @@ class AuthViewModel @Inject constructor(
     private val _updateProfileImageResult = MutableStateFlow<Resource<Unit>?>(null)
     val updateProfileImageResult: StateFlow<Resource<Unit>?> = _updateProfileImageResult
 
+    private val _profileImageUrl = MutableStateFlow<Resource<String>>(Resource.Loading)
+    val profileImageUrl: StateFlow<Resource<String>> get() = _profileImageUrl
+
     private val _location = MutableStateFlow<Place?>(null)
     val location: StateFlow<Place?> = _location
 
@@ -62,6 +71,7 @@ class AuthViewModel @Inject constructor(
 
     init {
         if (repository.currentUser != null) {
+            Log.i("MyTag", "User: $currentUser is logged in")
             _loginFlow.value = Resource.Success(repository.currentUser!!)
         }
     }
@@ -168,13 +178,21 @@ class AuthViewModel @Inject constructor(
     fun uploadProfileImage(uri: Uri) = viewModelScope.launch {
         val result = repository.uploadProfileImage(uri)
         _uploadImageResult.value = result
+        Log.i("MyTag", "uploadProfileImage: ViewModel: ${_uploadImageResult.value}")
     }
 
     fun updateProfileImageUrl(url: String) = viewModelScope.launch {
         val result = repository.updateProfileImageUrl(url)
         _updateProfileImageResult.value = result
+        Log.i("MyTag", "updateProfileImageUrl: ViewModel: ${_updateProfileImageResult.value}")
     }
 
+    fun fetchProfileImageUrl() {
+        viewModelScope.launch {
+            val result = repository.fetchProfileUrl()
+            _profileImageUrl.value = result
+        }
+    }
     fun updateLocation(place: Place) {
         _location.value = place
     }

@@ -1,9 +1,11 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlin.serialization)
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
+    id("com.google.relay")
 }
 
 android {
@@ -74,6 +76,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Material Compose
+    implementation(libs.material)
     implementation(libs.material3)
 
     // Image Loading
@@ -82,6 +85,7 @@ dependencies {
 
     // Navigation and lifecycle
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
@@ -107,7 +111,9 @@ dependencies {
     // Places API
     implementation(libs.places)
 
+
     implementation("com.google.android.gms:play-services-base:17.6.0")
 
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
+
 }
