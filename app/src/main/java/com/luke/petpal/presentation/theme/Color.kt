@@ -14,7 +14,10 @@ val appColorPrimary = Color(0xFFEA4A6A)
 val appColorSecondary = Color(0xFF7F7F7F)
 
 val appColorPrimaryLight = Color(0xA1EA4A6A)
-val cardColorPrimaryLight = Color(0xA1FBC9C9)
+val cardColorPrimaryLight = Color(0xB3FBC9C9)
+
+val appColorPrimaryDark = Color(0xFF273443)
+val cardColorPrimaryDark = Color(0xFF21C062)
 
 
 val md_theme_light_primary = Color(0xFF006492)

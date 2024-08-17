@@ -8,5 +8,5 @@ data class SignInResult(
 data class UserData(
     val userId: String,
     val username: String?,
-    val profilePicUrl: String?
+    val profileImageUrl: String?
 )

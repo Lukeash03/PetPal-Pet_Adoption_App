@@ -64,9 +64,9 @@ fun UsernameInput(
             keyboardType = KeyboardType.Ascii,
             imeAction = ImeAction.Next
         ),
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
         )
     )
 }

@@ -18,31 +18,49 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFF21C062),
+    onPrimary = Color.Black,
+
+    secondary = Color(0xCC242B31),
+    onSecondary = Color(0xFF848B91),
+
+    tertiary = Pink80,
+    onTertiary = Color.White,
+
+    background = Color(0xFF273443),
+    onBackground = Color(0xFFFFFFFF),
+
+    surface = Color(0xFF273443),
+    onSurface = Color(0xFF1C1B1F),
+
+    surfaceContainerLow = Color(0xFFFBC9C9)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Color(0xFFEA4A6A),
     onPrimary = Color.White,
+
+    secondary = Color(0xFFFBC9C9),
     onSecondary = Color.White,
+
+    tertiary = Pink40,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
+
+    background = Color(0xFFEFF4FA),
+    onBackground = Color(0xFF000000),
+
+    surface = Color(0xFFFBC9C9),
     onSurface = Color(0xFF1C1B1F),
-    */
+
+    surfaceVariant = Color(0xFFD9D9D9),
+    onSurfaceVariant = Color(0xFFF9C2BA),
 )
 
 object AppIcons {
@@ -58,7 +76,7 @@ object AppIcons {
 fun PetPalTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -92,25 +110,32 @@ private val LightColors = lightColorScheme(
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
     onPrimaryContainer = md_theme_light_onPrimaryContainer,
+
     secondary = md_theme_light_secondary,
     onSecondary = md_theme_light_onSecondary,
     secondaryContainer = md_theme_light_secondaryContainer,
     onSecondaryContainer = md_theme_light_onSecondaryContainer,
+
     tertiary = md_theme_light_tertiary,
     onTertiary = md_theme_light_onTertiary,
     tertiaryContainer = md_theme_light_tertiaryContainer,
     onTertiaryContainer = md_theme_light_onTertiaryContainer,
+
     error = md_theme_light_error,
     errorContainer = md_theme_light_errorContainer,
     onError = md_theme_light_onError,
     onErrorContainer = md_theme_light_onErrorContainer,
+
     background = md_theme_light_background,
     onBackground = md_theme_light_onBackground,
+
     surface = md_theme_light_surface,
     onSurface = md_theme_light_onSurface,
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
+
     outline = md_theme_light_outline,
+
     inverseOnSurface = md_theme_light_inverseOnSurface,
     inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,

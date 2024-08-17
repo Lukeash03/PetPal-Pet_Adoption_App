@@ -30,7 +30,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewmodel by viewModels<AuthViewModel>()
+//    private val viewmodel by viewModels<AuthViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             PetPalTheme {
                 RootNavGraph(
-                    viewModel = viewmodel,
                     navController = rememberNavController(),
                     splashScreenCompleted = splashScreenCompleted
                 )

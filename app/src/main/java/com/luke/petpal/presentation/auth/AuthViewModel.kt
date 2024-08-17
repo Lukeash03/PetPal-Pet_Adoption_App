@@ -12,6 +12,7 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.firebase.auth.FirebaseUser
 import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.data.models.Resource
+import com.luke.petpal.data.repository.ProfileImageRepository
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
@@ -31,7 +32,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository,
+    private val authRepository: AuthRepository,
+    private val profileImageRepository: ProfileImageRepository,
     private val googleAuthUIClient: GoogleAuthUIClient,
     private val validateEmail: ValidateEmail = ValidateEmail(),
     private val validatePassword: ValidatePassword = ValidatePassword()
@@ -67,24 +69,24 @@ class AuthViewModel @Inject constructor(
     val validationEvents = validationEventChannel.receiveAsFlow()
 
     val currentUser: FirebaseUser?
-        get() = repository.currentUser
+        get() = authRepository.currentUser
 
     init {
-        if (repository.currentUser != null) {
+        if (authRepository.currentUser != null) {
             Log.i("MyTag", "User: $currentUser is logged in")
-            _loginFlow.value = Resource.Success(repository.currentUser!!)
+            _loginFlow.value = Resource.Success(authRepository.currentUser!!)
         }
     }
 
     fun login(email: String, password: String) = viewModelScope.launch {
         _loginFlow.value = Resource.Loading
-        val result = repository.login(email, password)
+        val result = authRepository.login(email, password)
         _loginFlow.value = result
     }
 
     fun signUp(username: String, email: String, password: String) = viewModelScope.launch {
         _signUpFlow.value = Resource.Loading
-        val result = repository.signUp(username, email, password)
+        val result = authRepository.signUp(username, email, password)
         _signUpFlow.value = result
     }
 
@@ -135,21 +137,12 @@ class AuthViewModel @Inject constructor(
 
     fun sendPasswordResetEmail(email: String) = viewModelScope.launch {
         _passwordResetFlow.value = Resource.Loading
-        val result = repository.sendPasswordResetEmail(email)
+        val result = authRepository.sendPasswordResetEmail(email)
         _passwordResetFlow.value = result
     }
 
     fun resetPasswordResetFlow() {
         _passwordResetFlow.value = null
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            repository.logout()
-            googleAuthUIClient.signOut()
-            _loginFlow.value = null
-            _signUpFlow.value = null
-        }
     }
 
     private fun onSignInResult(result: SignInResult) {
@@ -176,23 +169,24 @@ class AuthViewModel @Inject constructor(
     }
 
     fun uploadProfileImage(uri: Uri) = viewModelScope.launch {
-        val result = repository.uploadProfileImage(uri)
+        val result = profileImageRepository.uploadProfileImage(uri)
         _uploadImageResult.value = result
         Log.i("MyTag", "uploadProfileImage: ViewModel: ${_uploadImageResult.value}")
     }
 
     fun updateProfileImageUrl(url: String) = viewModelScope.launch {
-        val result = repository.updateProfileImageUrl(url)
+        val result = profileImageRepository.updateProfileImageUrl(url)
         _updateProfileImageResult.value = result
         Log.i("MyTag", "updateProfileImageUrl: ViewModel: ${_updateProfileImageResult.value}")
     }
 
     fun fetchProfileImageUrl() {
         viewModelScope.launch {
-            val result = repository.fetchProfileUrl()
+            val result = profileImageRepository.fetchProfileUrl()
             _profileImageUrl.value = result
         }
     }
+
     fun updateLocation(place: Place) {
         _location.value = place
     }

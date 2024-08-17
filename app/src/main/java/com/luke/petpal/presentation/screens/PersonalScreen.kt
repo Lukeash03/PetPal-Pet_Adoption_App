@@ -26,9 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,28 +44,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.luke.petpal.R
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.navigation.Graph
-import com.luke.petpal.presentation.auth.AuthViewModel
-import com.luke.petpal.presentation.auth.SignUpDetailScreen
+import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
-import com.luke.petpal.presentation.theme.appColorSecondary
 import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalScreen(
-    viewModel: AuthViewModel?
+    homeViewModel: HomeViewModel?
 ) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -79,11 +72,10 @@ fun PersonalScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel?.fetchProfileImageUrl()
+        homeViewModel?.fetchProfileImageUrl()
     }
 
-    val profileImageUrl by viewModel?.profileImageUrl?.collectAsState() ?: remember { mutableStateOf(Resource.Loading) }
-//    val profileImageUrl = viewModel?.profileImageUrl?.collectAsState()
+    val profileImageUrl by homeViewModel?.profileImageUrl?.collectAsState() ?: remember { mutableStateOf(Resource.Loading) }
 
     Column(
         modifier = Modifier
@@ -150,8 +142,25 @@ fun PersonalScreen(
                     )
                 }
                 is Resource.Failure -> {
-                    // Handle the error state
-                    Image(
+                    imageUri?.let { uri ->
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current).data(data = uri)
+                                    .apply(block = fun ImageRequest.Builder.() {
+                                        transformations(CircleCropTransformation())
+                                    }).build()
+                            ),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(200.dp - (4f * 2).dp)
+                                .clickable {
+                                    imagePickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                }
+                        )
+                    } ?: Image(
                         painter = painterResource(id = R.drawable.bx_camera),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
@@ -167,47 +176,6 @@ fun PersonalScreen(
             }
         }
 
-//        Box(
-//            contentAlignment = Alignment.Center,
-//            modifier = Modifier
-//                .size(200.dp) // Size of the circular image holder
-//                .clip(CircleShape)
-//                .background(Color.White)
-//                .border(5.dp, appColorPrimary, CircleShape)
-//        ) {
-//            imageUri?.let { uri ->
-//                Image(
-//                    painter = rememberAsyncImagePainter(
-//                        ImageRequest.Builder(LocalContext.current).data(data = uri)
-//                            .apply(block = fun ImageRequest.Builder.() {
-//                                transformations(CircleCropTransformation())
-//                            }).build()
-//                    ),
-//                    contentDescription = null,
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .size(200.dp - (4f * 2).dp)
-//                        .clickable {
-//                            imagePickerLauncher.launch(
-//                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-//                            )
-//                        }
-//                )
-//            } ?: Image(
-//                painter = painterResource(id = R.drawable.bx_camera),
-//                contentDescription = null,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .size(150.dp - (4f * 2).dp)
-//                    .clickable {
-//                        imagePickerLauncher.launch(
-//                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-//                        )
-//                    }
-//            )
-//        }
-
-
         Box(
             contentAlignment = Alignment.Center,
         ) {
@@ -218,13 +186,13 @@ fun PersonalScreen(
                 Button(
                     onClick = {
                         imageUri?.let { uri ->
-                            viewModel?.viewModelScope?.launch {
-                                viewModel.uploadProfileImage(uri)
-                                viewModel.uploadImageResult.collect { uploadResult ->
+                            homeViewModel?.viewModelScope?.launch {
+                                homeViewModel.uploadProfileImage(uri)
+                                homeViewModel.uploadImageResult.collect { uploadResult ->
                                     if (uploadResult is Resource.Success) {
                                         val imageUrl = uploadResult.result
-                                        viewModel.updateProfileImageUrl(imageUrl)
-                                        viewModel.updateProfileImageResult.collect { updateResult ->
+                                        homeViewModel.updateProfileImageUrl(imageUrl)
+                                        homeViewModel.updateProfileImageResult.collect { updateResult ->
                                             if (updateResult is Resource.Success) {
                                                 Toast.makeText(
                                                     context,

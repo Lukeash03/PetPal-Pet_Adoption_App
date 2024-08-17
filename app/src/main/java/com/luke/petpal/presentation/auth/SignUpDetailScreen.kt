@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,11 +68,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) {
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri: Uri? -> imageUri = uri }
     )
+
+    LaunchedEffect(Unit) {
+        viewModel?.fetchProfileImageUrl()
+    }
 
     val context = LocalContext.current
     val uploadImageResult = viewModel?.uploadImageResult?.collectAsState()

@@ -11,8 +11,8 @@ interface AuthRepository {
     suspend fun isEmailVerified(): Boolean?
     suspend fun resendEmailVerification(): Resource<Unit>
     suspend fun sendPasswordResetEmail(email: String): Resource<Unit>
-    suspend fun uploadProfileImage(uri: Uri): Resource<String>
-    suspend fun updateProfileImageUrl(url: String): Resource<Unit>
-    suspend fun fetchProfileUrl(): Resource<String>
-    fun logout()
+//    suspend fun uploadProfileImage(uri: Uri): Resource<String>
+//    suspend fun updateProfileImageUrl(url: String): Resource<Unit>
+//    suspend fun fetchProfileUrl(): Resource<String>
+//    fun logout()
 }

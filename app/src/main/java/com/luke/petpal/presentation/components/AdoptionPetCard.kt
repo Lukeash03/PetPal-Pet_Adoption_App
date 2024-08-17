@@ -110,10 +110,14 @@ fun PetCardPreview() {
     PetPalTheme {
         AdoptionPetCard(
             pet = Pet(
-                id = 0,
                 name = "Waffles",
                 species = "Dog",
-                age = 2
+                breed = "Labrador",
+                gender = "Male",
+                age = 2,
+                weight = 10,
+                color = "White",
+                photos = null
             )
         )
     }

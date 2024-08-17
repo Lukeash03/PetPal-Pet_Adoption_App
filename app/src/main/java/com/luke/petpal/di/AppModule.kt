@@ -6,7 +6,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.repository.AuthRepository
+import com.luke.petpal.data.repository.HomeRepository
+import com.luke.petpal.data.repository.ProfileImageRepository
 import com.luke.petpal.domain.repository.AuthRepositoryImpl
+import com.luke.petpal.domain.repository.HomeRepositoryImpl
+import com.luke.petpal.domain.repository.ProfileImageRepositoryImpl
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
@@ -38,6 +42,12 @@ class AppModule {
 
     @Provides
     fun provideAuthRepository(impl: AuthRepositoryImpl): AuthRepository = impl
+
+    @Provides
+    fun provideHomeRepository(impl: HomeRepositoryImpl): HomeRepository = impl
+
+    @Provides
+    fun provideProfileImageRepository(impl: ProfileImageRepositoryImpl): ProfileImageRepository = impl
 
     @Provides
     @Singleton

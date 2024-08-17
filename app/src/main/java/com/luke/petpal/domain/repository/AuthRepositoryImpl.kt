@@ -15,7 +15,6 @@ import javax.inject.Inject
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
 ) : AuthRepository {
 
     override val currentUser: FirebaseUser?
@@ -42,11 +41,29 @@ class AuthRepositoryImpl @Inject constructor(
                 UserProfileChangeRequest.Builder().setDisplayName(username).build()
             )?.await()
             result?.user?.sendEmailVerification()?.await()
+
+            createUserProfile(result.user!!)
+
             Resource.Success(result.user!!)
         } catch (e: Exception) {
             e.printStackTrace()
             Resource.Failure(e)
         }
+    }
+
+    private fun createUserProfile(user: FirebaseUser) {
+        val userProfile = mapOf(
+            "uid" to user.uid,
+            "email" to user.email,
+            "profileImageUrl" to "" // or default URL if any
+        )
+        firestore.collection("users").document(user.uid).set(userProfile)
+            .addOnSuccessListener {
+                Log.d("Firestore", "User profile created successfully: ${user.uid}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error creating user profile", e)
+            }
     }
 
     override suspend fun isEmailVerified(): Boolean? {
@@ -80,62 +97,4 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadProfileImage(uri: Uri): Resource<String> {
-        return try {
-            val storageRef =
-                storage.reference.child("profileImages/${firebaseAuth.currentUser?.uid}")
-            val uploadTask = storageRef.putFile(uri).await()
-            val downloadUrl = uploadTask.storage.downloadUrl.await()
-            Resource.Success(downloadUrl.toString())
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Resource.Failure(e)
-        }
-    }
-
-    override suspend fun updateProfileImageUrl(url: String): Resource<Unit> {
-        return try {
-            val user = firebaseAuth.currentUser
-            Log.i("MyTag", "UpdateProfileUrl: UserId: $user")
-            val userProfileChangeRequest = UserProfileChangeRequest.Builder()
-                .setPhotoUri(Uri.parse(url))
-                .build()
-            user?.updateProfile(userProfileChangeRequest)?.await()
-
-            Log.i("MyTag", "UpdateProfileUrl: UserId: $user Started")
-
-            user?.uid?.let { uid ->
-                firestore.collection("users").document(uid).update("profileImageUrl", url).await()
-                Log.i("MyTag", "UpdateProfileUrl: Firestore updated with new profileImageUrl")
-            }
-
-            Log.i("MyTag", "UpdateProfileUrl: UserId: $user Success")
-            Resource.Success(Unit)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Resource.Failure(e)
-        }
-    }
-
-    override suspend fun fetchProfileUrl(): Resource<String> {
-        return try {
-            val user = firebaseAuth.currentUser
-            user?.uid?.let { uid ->
-                val documentSnapshot = firestore.collection("users").document(user.uid).get().await()
-                val profileImageUrl = documentSnapshot.getString("profileImageUrl")
-                if (profileImageUrl != null) {
-                    Resource.Success(profileImageUrl)
-                } else {
-                    Resource.Failure(Exception("Profile image not found"))
-                }
-            } ?: Resource.Failure(Exception("User is not logged in"))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Resource.Failure(e)
-        }
-    }
-
-    override fun logout() {
-        firebaseAuth.signOut()
-    }
 }

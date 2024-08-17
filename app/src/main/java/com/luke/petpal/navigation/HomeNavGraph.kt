@@ -8,28 +8,45 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import com.luke.petpal.BottomBarScreen
-import com.luke.petpal.presentation.auth.AuthViewModel
+import com.luke.petpal.presentation.HomeViewModel
+import com.luke.petpal.presentation.screens.AddPetScreen
 import com.luke.petpal.presentation.screens.AdoptionScreen
 import com.luke.petpal.presentation.screens.PersonalScreen
 
 @Composable
-fun HomeNavGraph(navController: NavHostController, paddingValues: PaddingValues, viewModel: AuthViewModel?) {
+fun HomeNavGraph(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    homeViewModel: HomeViewModel?
+) {
 
     val homeNavGraph: NavGraph = navController.createGraph(
         startDestination = BottomBarScreen.Home.route,
         route = Graph.HOME
     ) {
         composable(route = BottomBarScreen.Home.route) {
-            AdoptionScreen(name = BottomBarScreen.Home.route, paddingValues)
+            AdoptionScreen(
+                name = BottomBarScreen.Home.route,
+                paddingValues = paddingValues,
+                onClick = {
+                    navController.navigate(Graph.HOME_ADD_PET)
+                }
+            )
         }
         composable(route = BottomBarScreen.Liked.route) {
-            AdoptionScreen(name = BottomBarScreen.Liked.route, paddingValues)
+//            AdoptionScreen(name = BottomBarScreen.Liked.route, paddingValues)
         }
         composable(route = BottomBarScreen.Chat.route) {
-            AdoptionScreen(name = BottomBarScreen.Chat.route, paddingValues)
+//            AdoptionScreen(name = BottomBarScreen.Chat.route, paddingValues)
         }
         composable(route = BottomBarScreen.Personal.route) {
-            PersonalScreen(viewModel)
+            PersonalScreen(homeViewModel)
+        }
+        composable(route = Graph.HOME_ADD_PET) {
+            AddPetScreen(
+                homeViewModel = homeViewModel,
+                paddingValues = paddingValues
+            )
         }
     }
 
