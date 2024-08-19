@@ -1,8 +1,10 @@
 package com.luke.petpal.presentation.screens
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.res.Configuration
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -56,8 +58,13 @@ import com.luke.petpal.presentation.theme.appColorPrimary
 fun HomeScreen(
     homeViewModel: HomeViewModel?,
     navController: NavHostController = rememberNavController(),
-    logout: () -> Unit
+    logout: () -> Unit,
+    activity: Activity
 ) {
+
+    BackHandler {
+        activity.finish()
+    }
 
     val systemUiController = rememberSystemUiController()
     val statusBarColor = appColorPrimary
@@ -91,14 +98,18 @@ fun HomeScreen(
             TopAppBar(
                 navigationIcon = {
                     IconButton(onClick = { }) {
-                        Icon(imageVector = Icons.Default.Menu, contentDescription = "")
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
                 title = {
                     Text(
                         text = stringResource(id = R.string.app_name),
                         fontFamily = FontFamily.Cursive,
-                        color = appColorPrimary
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 actions = {
@@ -217,7 +228,7 @@ fun RowScope.AddItem(
 @Composable
 fun HomeScreenPreviewLight() {
     PetPalTheme {
-        HomeScreen(null, rememberNavController()) { }
+        HomeScreen(null, rememberNavController(), activity = Activity(), logout = { })
     }
 }
 
@@ -225,6 +236,6 @@ fun HomeScreenPreviewLight() {
 @Composable
 fun HomeScreenPreviewDark() {
     AppTheme {
-        HomeScreen(null, rememberNavController()) { }
+        HomeScreen(null, rememberNavController(), logout = { }, activity = Activity())
     }
 }

@@ -8,5 +8,6 @@ import com.luke.petpal.domain.data.Pet
 interface HomeRepository {
     val currentUser: FirebaseUser?
     suspend fun uploadPet(pet: Pet): Resource<Unit>
+    suspend fun fetchPetList(): Resource<List<Pet>>
     fun logout()
 }

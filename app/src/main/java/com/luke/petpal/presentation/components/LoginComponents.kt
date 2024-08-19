@@ -1,9 +1,11 @@
 package com.luke.petpal.presentation.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,9 +49,14 @@ fun UsernameInput(
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester ?: FocusRequester()),
+            .focusRequester(focusRequester ?: FocusRequester())
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                RoundedCornerShape(10.dp)
+            ),
         leadingIcon = {
-            androidx.compose.material3.Icon(
+            Icon(
                 imageVector = icon,
                 contentDescription = label
             )
@@ -65,6 +72,16 @@ fun UsernameInput(
             imeAction = ImeAction.Next
         ),
         colors = TextFieldDefaults.colors(
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            focusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         )
@@ -86,9 +103,14 @@ fun EmailInput(
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester ?: FocusRequester()),
+            .focusRequester(focusRequester ?: FocusRequester())
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                RoundedCornerShape(10.dp)
+            ),
         leadingIcon = {
-            androidx.compose.material3.Icon(
+            Icon(
                 imageVector = icon,
                 contentDescription = label
             )
@@ -103,10 +125,18 @@ fun EmailInput(
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         ),
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
-        )
+        ),
     )
 }
 
@@ -130,7 +160,12 @@ fun PasswordInput(
         isError = isError,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester ?: FocusRequester()),
+            .focusRequester(focusRequester ?: FocusRequester())
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                RoundedCornerShape(10.dp)
+            ),
         leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
         trailingIcon = {
             val passwordIcon = if (passwordVisible) {
@@ -162,7 +197,17 @@ fun PasswordInput(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            focusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )

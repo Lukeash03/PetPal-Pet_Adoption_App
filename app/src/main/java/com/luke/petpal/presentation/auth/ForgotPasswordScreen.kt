@@ -2,6 +2,7 @@ package com.luke.petpal.presentation.auth
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,8 +65,17 @@ fun ForgotPasswordScreen(
             label = { Text("Email") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            colors = TextFieldDefaults.textFieldColors(
+                .padding(16.dp)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                    RoundedCornerShape(10.dp)
+                ),
+            colors = TextFieldDefaults.colors(
+                focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),

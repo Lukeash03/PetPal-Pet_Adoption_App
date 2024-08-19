@@ -108,13 +108,13 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
             ) {
                 Text(
                     text = "Sign ",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Up",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = appColorPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -122,7 +122,7 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
             Row {
                 Text(
                     text = "Complete your profile so we can know you better",
-                    color = appColorSecondary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
                     style = TextStyle(
@@ -132,43 +132,54 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
             }
         }
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(200.dp) // Size of the circular image holder
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(5.dp, appColorPrimary, CircleShape)
-        ) {
-            imageUri?.let { uri ->
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current).data(data = uri)
-                            .apply(block = fun ImageRequest.Builder.() {
-                                transformations(CircleCropTransformation())
-                            }).build()
-                    ),
+        Column {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(200.dp) // Size of the circular image holder
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(2.dp, appColorPrimary, CircleShape)
+            ) {
+                imageUri?.let { uri ->
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            ImageRequest.Builder(LocalContext.current).data(data = uri)
+                                .apply(block = fun ImageRequest.Builder.() {
+                                    transformations(CircleCropTransformation())
+                                }).build()
+                        ),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(200.dp - (4f * 2).dp)
+                            .clickable {
+                                imagePickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }
+                    )
+                } ?: Image(
+                    painter = painterResource(id = R.drawable.bx_camera),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(200.dp - (4f * 2).dp)
+                        .size(150.dp - (4f * 2).dp)
                         .clickable {
                             imagePickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         }
                 )
-            } ?: Image(
-                painter = painterResource(id = R.drawable.bx_camera),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(150.dp - (4f * 2).dp)
-                    .clickable {
-                        imagePickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Add a profile photo",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Medium
             )
         }
 
@@ -193,13 +204,19 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                     Icon(
                         painter = painterResource(id = R.drawable.placeholder),
                         contentDescription = "Choose on map",
-                        Modifier
-                            .size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 shape = RoundedCornerShape(10.dp),
                 onValueChange = { location = it },
-                label = { Text("Enter Location") },
+                label = {
+                    Text(
+                        text = "Enter Location",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -258,7 +275,7 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                         Text(
                             text = "Continue",
                             Modifier.padding(8.dp),
-                            color = MaterialTheme.colorScheme.background
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -272,7 +289,7 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                 Text(
                     text = "I'll do this later",
                     textDecoration = TextDecoration.Underline,
-                    color = appColorPrimary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Normal,
                     modifier = Modifier
                         .clickable {

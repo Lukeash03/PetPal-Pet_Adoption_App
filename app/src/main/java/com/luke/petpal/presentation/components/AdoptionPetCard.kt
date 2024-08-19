@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.luke.petpal.R
 import com.luke.petpal.domain.data.Pet
 import com.luke.petpal.presentation.theme.PetPalTheme
@@ -54,10 +55,13 @@ fun AdoptionPetCard(pet: Pet) {
                     .clip(CircleShape)
                     .background(Color.Transparent)
             ) {
+                val painter = rememberAsyncImagePainter(
+                    model = pet.photos?.firstOrNull() ?: R.drawable.lab_1
+                )
                 Image(
-                    painter = painterResource(id = R.drawable.lab_1),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop
+                    painter = painter,
+                    contentDescription = "Pet Image",
+                    contentScale = ContentScale.FillHeight
                 )
             }
 

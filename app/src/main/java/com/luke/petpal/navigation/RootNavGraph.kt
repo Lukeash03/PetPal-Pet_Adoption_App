@@ -1,7 +1,9 @@
 package com.luke.petpal.navigation
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
@@ -32,13 +34,15 @@ fun RootNavGraph(
             splashScreenCompleted = splashScreenCompleted
         )
         composable(route = Graph.HOME) {
+            val activity = LocalContext.current as Activity
             HomeScreen(
                 homeViewModel = homeViewModel,
                 logout = {
                     navController.navigate(AuthScreen.Login.route) {
                         popUpTo(0) {}
                     }
-                }
+                },
+                activity = activity
             )
         }
     }

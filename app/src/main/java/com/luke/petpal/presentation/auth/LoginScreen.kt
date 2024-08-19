@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,14 +20,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -148,7 +156,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Welcome ",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -165,7 +173,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Continue your PetPal journey with us",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light
                 )
@@ -219,7 +227,7 @@ fun LoginScreen(
                     textDecoration = TextDecoration.Underline
                 )
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(25.dp))
 
                 Button(
                     onClick = {
@@ -228,11 +236,15 @@ fun LoginScreen(
                     Modifier
                         .fillMaxWidth(fraction = 0.5f)
                         .align(Alignment.CenterHorizontally),
-                    colors = ButtonDefaults.buttonColors(appColorPrimary),
+                    colors = ButtonDefaults.buttonColors(appColorPrimary.copy(0.9f)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Box {
-                        Text(text = "Log In", Modifier.padding(8.dp))
+                        Text(
+                            text = "Log In",
+                            color = Color.White,
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
                 }
 
@@ -246,9 +258,27 @@ fun LoginScreen(
                     onClick = {
                         viewModel?.triggerGoogleSignIn()
                     },
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonColors(
+                        MaterialTheme.colorScheme.surfaceContainerLow,
+                        MaterialTheme.colorScheme.onSurface,
+                        Color.Transparent,
+                        Color.Transparent
+                    ),
+                    border = BorderStroke(1.dp, Color.Black.copy(0.5f)),
+                    contentPadding = ButtonDefaults.TextButtonContentPadding,
                 ) {
-                    Text(text = "Sign in with google")
+                    Icon(
+                        painter = painterResource(id = R.drawable.google_signin),
+                        contentDescription = "Google icon",
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Sign in with google"
+                    )
                 }
             }
 
@@ -264,11 +294,12 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Don't have an account?",
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "Sign Up",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    textDecoration = TextDecoration.Underline,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .clickable {

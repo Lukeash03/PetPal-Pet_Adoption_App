@@ -35,6 +35,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -111,6 +112,9 @@ dependencies {
     // Places API
     implementation(libs.places)
 
+    // Date Picker
+    implementation(libs.datetime)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation("com.google.android.gms:play-services-base:17.6.0")
 

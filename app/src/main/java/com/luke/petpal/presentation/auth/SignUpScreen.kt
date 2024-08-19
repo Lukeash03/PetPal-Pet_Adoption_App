@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,7 +125,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
             ) {
                 Text(
                     text = "Sign ",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -138,7 +139,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
             Row {
                 Text(
                     text = "Create a new account to join\nour furry community",
-                    color = appColorSecondary,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
                     style = TextStyle(
@@ -234,7 +235,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                         Text(
                             text = "Continue",
                             Modifier.padding(8.dp),
-                            color = MaterialTheme.colorScheme.background
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -250,10 +251,11 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
             ) {
                 Text(
                     text = "Already have an account?",
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "Login",
+                    textDecoration = TextDecoration.Underline,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier

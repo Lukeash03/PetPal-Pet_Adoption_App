@@ -38,6 +38,13 @@ class HomeViewModel @Inject constructor(
     private val _uploadStatus = MutableStateFlow<Resource<Unit>?>(null)
     val uploadStatus: StateFlow<Resource<Unit>?> = _uploadStatus
 
+    private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
+    val petList: StateFlow<List<Pet>?> = _petList
+
+    init {
+        fetchPets()
+    }
+
     val currentUser: FirebaseUser? get() = homeRepository.currentUser
 
     fun logout() {
@@ -74,5 +81,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun fetchPets() {
+        viewModelScope.launch {
+            val result = homeRepository.fetchPetList()
+            Log.i("MYTAG", result.toString())
+            if (result is Resource.Success) {
+                _petList.value = result.result
+            } else {
+                // Handle error
+            }
+        }
+    }
 
 }

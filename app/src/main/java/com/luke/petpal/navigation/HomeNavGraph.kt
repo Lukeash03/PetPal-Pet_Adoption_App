@@ -26,7 +26,7 @@ fun HomeNavGraph(
     ) {
         composable(route = BottomBarScreen.Home.route) {
             AdoptionScreen(
-                name = BottomBarScreen.Home.route,
+                homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
                 onClick = {
                     navController.navigate(Graph.HOME_ADD_PET)
@@ -45,7 +45,10 @@ fun HomeNavGraph(
         composable(route = Graph.HOME_ADD_PET) {
             AddPetScreen(
                 homeViewModel = homeViewModel,
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
+                onAddPet = {
+                    navController.navigate(Graph.HOME)
+                }
             )
         }
     }
