@@ -41,8 +41,11 @@ class HomeViewModel @Inject constructor(
     private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
     val petList: StateFlow<List<Pet>?> = _petList
 
+    private val _petById = MutableStateFlow<Pet?>(null)
+    val petById: StateFlow<Pet?> = _petById
+
     init {
-        fetchPets()
+        fetchAllPets()
     }
 
     val currentUser: FirebaseUser? get() = homeRepository.currentUser
@@ -81,7 +84,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun fetchPets() {
+    private fun fetchAllPets() {
         viewModelScope.launch {
             val result = homeRepository.fetchPetList()
             Log.i("MYTAG", result.toString())
@@ -89,6 +92,16 @@ class HomeViewModel @Inject constructor(
                 _petList.value = result.result
             } else {
                 // Handle error
+            }
+        }
+    }
+
+    fun fetchPetById(petId: String) {
+        viewModelScope.launch {
+            val result = homeRepository.fetchPetById(petId)
+            Log.i("MYTAG", "FetchPetById: $result")
+            if (result is Resource.Success<*>) {
+                _petById.value = result.result as Pet?
             }
         }
     }

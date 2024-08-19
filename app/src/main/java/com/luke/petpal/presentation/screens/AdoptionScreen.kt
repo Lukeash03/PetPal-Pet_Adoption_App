@@ -45,7 +45,12 @@ fun AdoptionScreen(
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             items(petList) { pet ->
-                AdoptionPetCard(pet = pet)
+                AdoptionPetCard(
+                    pet = pet,
+                    onSeeMoreClick = {
+                        onClick()
+                    }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }

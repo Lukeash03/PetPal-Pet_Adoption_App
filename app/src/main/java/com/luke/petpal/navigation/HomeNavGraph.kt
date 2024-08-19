@@ -11,6 +11,7 @@ import com.luke.petpal.BottomBarScreen
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.screens.AddPetScreen
 import com.luke.petpal.presentation.screens.AdoptionScreen
+import com.luke.petpal.presentation.screens.DetailedPetScreen
 import com.luke.petpal.presentation.screens.PersonalScreen
 
 @Composable
@@ -29,7 +30,7 @@ fun HomeNavGraph(
                 homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
                 onClick = {
-                    navController.navigate(Graph.HOME_ADD_PET)
+                    navController.navigate(Graph.HOME_PET_ADD)
                 }
             )
         }
@@ -42,13 +43,19 @@ fun HomeNavGraph(
         composable(route = BottomBarScreen.Personal.route) {
             PersonalScreen(homeViewModel)
         }
-        composable(route = Graph.HOME_ADD_PET) {
+        composable(route = Graph.HOME_PET_ADD) {
             AddPetScreen(
                 homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
                 onAddPet = {
                     navController.navigate(Graph.HOME)
                 }
+            )
+        }
+        composable(route = Graph.HOME_PET_DETAILED) {
+            DetailedPetScreen(
+                homeViewModel = homeViewModel,
+                paddingValues = paddingValues,
             )
         }
     }

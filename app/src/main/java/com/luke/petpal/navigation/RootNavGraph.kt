@@ -58,5 +58,6 @@ object Graph {
     const val ROOT = "root_graph"
     const val AUTHENTICATION = "auth_graph"
     const val HOME = "home_graph"
-    const val HOME_ADD_PET = "home_add_pet_graph"
+    const val HOME_PET_ADD = "home_pet_add_graph"
+    const val HOME_PET_DETAILED = "home_pet_detailed_graph"
 }

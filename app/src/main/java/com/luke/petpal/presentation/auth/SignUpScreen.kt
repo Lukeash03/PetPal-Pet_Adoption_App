@@ -59,7 +59,6 @@ import com.luke.petpal.presentation.auth.validation.RegistrationFormEvent
 import com.luke.petpal.presentation.theme.AppIcons
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
-import com.luke.petpal.presentation.theme.appColorSecondary
 
 @Composable
 fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
@@ -101,15 +100,15 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.signup_pic),
+                painter = painterResource(id = R.drawable.sign_up_),
                 contentDescription = "logo",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
                     .fillMaxSize()
-                    .offset(y = 30.dp)
+                    .offset(y = 10.dp)
                     .graphicsLayer(
-                        scaleX = 1.6f,
-                        scaleY = 1.6f
+                        scaleX = 1.1f,
+                        scaleY = 1.1f
                     )
             )
         }
@@ -165,16 +164,29 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                     label = stringResource(id = R.string.label_username),
                     icon = AppIcons.Username,
                     currentValue = username,
+                    isError = state?.usernameError != null,
                     keyboardActions = KeyboardActions(onNext = { emailFocusRequester.requestFocus() }),
-                    onValueChange = { username = it }
+                    onValueChange = {
+                        username = it
+                        viewModel?.onEvent(RegistrationFormEvent.UsernameChanged(it))
+                    }
                 )
-
-                Spacer(modifier = Modifier.height(20.dp))
+                if (state?.usernameError != null) {
+                    Text(
+                        text = state.usernameError,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
 
                 EmailInput(
                     label = stringResource(id = R.string.label_email),
                     icon = AppIcons.Email,
                     currentValue = email,
+                    isError = state?.emailError != null,
                     keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
                     onValueChange = {
                         email = it
@@ -189,9 +201,7 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.align(Alignment.End)
                     )
-                }
-
-                if (state?.emailError == null) {
+                } else {
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 

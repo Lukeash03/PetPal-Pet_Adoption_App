@@ -49,6 +49,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,9 +74,14 @@ import com.luke.petpal.presentation.components.PetDetailsDropdownTextField
 import com.luke.petpal.presentation.components.PetDetailsTextField
 import com.luke.petpal.presentation.components.PetDetailsTextFieldWithDatePicker
 import com.luke.petpal.presentation.theme.PetPalTheme
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import com.vanpra.composematerialdialogs.title
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @Composable
@@ -99,6 +105,15 @@ fun AddPetScreen(
     var pet: Pet
 
     var dob by remember { mutableStateOf(LocalDate.now()) }
+    val formattedDate by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("DD-mm-yyyy")
+                .format(dob)
+        }
+    }
+
+    val dateDialogState = rememberMaterialDialogState()
 
     val context = LocalContext.current
     var imageStrings by remember { mutableStateOf<List<String>?>(null) }
@@ -120,25 +135,21 @@ fun AddPetScreen(
         when {
             petName.isBlank() -> {
                 Toast.makeText(context, "Please enter a pet name.", Toast.LENGTH_SHORT).show()
-//                showToast("Please enter a pet name.")
                 false
             }
 
             selectedSpecies.isBlank() -> {
                 Toast.makeText(context, "Please select a species.", Toast.LENGTH_SHORT).show()
-//                showToast("Please select a species.")
                 false
             }
 
             petBreed.isBlank() -> {
                 Toast.makeText(context, "Please enter a breed.", Toast.LENGTH_SHORT).show()
-//                showToast("Please enter a breed.")
                 false
             }
 
             petGender.isBlank() -> {
                 Toast.makeText(context, "Please select a gender.", Toast.LENGTH_SHORT).show()
-//                showToast("Please select a gender.")
                 false
             }
 
@@ -275,61 +286,61 @@ fun AddPetScreen(
 
                                 Spacer(modifier = Modifier.width(8.dp))
 
-                                Box(modifier = Modifier.weight(1f)) {
-                                    var selectedDate by remember { mutableStateOf("") }
-
-                                    val calendar = Calendar.getInstance()
-                                    val year = calendar.get(Calendar.YEAR)
-                                    val month = calendar.get(Calendar.MONTH)
-                                    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-                                    val datePickerDialog = DatePickerDialog(
-                                        LocalContext.current,
-                                        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
-                                            selectedDate = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
-//                                            onValueChange(selectedDate)
-                                        }, year, month, day
-                                    )
-
-                                    TextField(
-                                        value = selectedDate,
-                                        onValueChange = {},
-                                        label = { Text(text = "Date of Birth") },
-                                        modifier = Modifier.clickable {
-                                            datePickerDialog.show()
-                                        },
-                                        shape = RoundedCornerShape(10.dp),
-                                        readOnly = true,
-                                        colors = TextFieldDefaults.colors(
-                                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.5f),
-                                            focusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-                                            unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                                            focusedContainerColor = MaterialTheme.colorScheme.background,
-                                            focusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                                            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                                            focusedIndicatorColor = Color.Transparent,
-                                            unfocusedIndicatorColor = Color.Transparent,
-                                        )
-
-                                    )
+//                                Box(modifier = Modifier.weight(1f)) {
+//                                    var selectedDate by remember { mutableStateOf("") }
+//
+//                                    val calendar = Calendar.getInstance()
+//                                    val year = calendar.get(Calendar.YEAR)
+//                                    val month = calendar.get(Calendar.MONTH)
+//                                    val day = calendar.get(Calendar.DAY_OF_MONTH)
+//
+//                                    val datePickerDialog = DatePickerDialog(
+//                                        LocalContext.current,
+//                                        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+//                                            selectedDate = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
+////                                            onValueChange(selectedDate)
+//                                        }, year, month, day
+//                                    )
+//
+//                                    TextField(
+//                                        value = selectedDate,
+//                                        onValueChange = {},
+//                                        label = { Text(text = "Date of Birth") },
+//                                        modifier = Modifier.clickable {
+//                                            dateDialogState.show()
+//                                        },
+//                                        shape = RoundedCornerShape(10.dp),
+//                                        readOnly = true,
+//                                        colors = TextFieldDefaults.colors(
+//                                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.5f),
+//                                            focusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.6f),
+//                                            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+//                                            focusedContainerColor = MaterialTheme.colorScheme.background,
+//                                            focusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+//                                            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+//                                            focusedIndicatorColor = Color.Transparent,
+//                                            unfocusedIndicatorColor = Color.Transparent,
+//                                        )
+//
+//                                    )
 
 //                                    PetDetailsTextFieldWithDatePicker(
 //                                        value = petAge,
 //                                        onValueChange = { petAge = it },
 //                                        label = "Date of Birth"
 //                                    )
-                                }
+//                                }
 
-//                                PetDetailsTextField(
-//                                    value = petAge,
-//                                    onValueChange = { petAge = it },
-//                                    label = "Age",
-//                                    modifier = Modifier
-//                                        .weight(1f),
-//                                    keyboardOptions = KeyboardOptions.Default.copy(
-//                                        keyboardType = KeyboardType.Number
-//                                    )
-//                                )
+                                PetDetailsTextField(
+                                    value = petAge,
+                                    onValueChange = { petAge = it },
+                                    label = "Age",
+                                    modifier = Modifier
+                                        .weight(1f),
+                                    keyboardOptions = KeyboardOptions.Default.copy(
+                                        keyboardType = KeyboardType.Number
+                                    )
+                                )
                             }
 
                             Row(
@@ -484,6 +495,22 @@ fun AddPetScreen(
             }
         }
     }
+
+//    MaterialDialog(
+//        dialogState = dateDialogState,
+//        shape = RoundedCornerShape(10.dp),
+//        buttons = {
+//            positiveButton(text = "Ok")
+//            negativeButton(text = "Cancel")
+//        }
+//    ) {
+//        datepicker(
+//            initialDate = LocalDate.now(),
+//            title = "Pick a date",
+//        ) {
+//            dob = it
+//        }
+//    }
 }
 
 fun compressImages(uris: List<Uri>, context: Context): List<Uri> {

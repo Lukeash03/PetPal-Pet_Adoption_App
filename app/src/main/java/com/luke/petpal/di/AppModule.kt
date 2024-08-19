@@ -13,6 +13,7 @@ import com.luke.petpal.domain.repository.HomeRepositoryImpl
 import com.luke.petpal.domain.repository.ProfileImageRepositoryImpl
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
+import com.luke.petpal.domain.repository.usecase.ValidateUsername
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
 import dagger.Module
 import dagger.Provides
@@ -24,6 +25,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 class AppModule {
+
+    @Provides
+    fun provideValidateUsername(): ValidateUsername = ValidateUsername()
 
     @Provides
     fun provideValidateEmail(): ValidateEmail = ValidateEmail()

@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.models.Resource
@@ -86,6 +87,19 @@ class HomeRepositoryImpl @Inject constructor(
             Resource.Success(petList)
         } catch (e: Exception) {
             Log.i("MYTAG", "fetchPetList: $e")
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun fetchPetById(petId: String): Resource<Pet?> {
+        return try {
+            val documentSnapshot: DocumentSnapshot =
+                firestore.collection("pets").document(petId).get().await()
+            val pet = documentSnapshot.toObject(Pet::class.java)
+
+            Resource.Success(pet)
+        } catch (e: Exception) {
+            e.printStackTrace()
             Resource.Failure(e)
         }
     }

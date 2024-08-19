@@ -1,10 +1,7 @@
 package com.luke.petpal.presentation.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,6 +37,7 @@ fun UsernameInput(
     label: String,
     icon: ImageVector,
     currentValue: String,
+    isError: Boolean,
     focusRequester: FocusRequester? = null,
     keyboardActions: KeyboardActions,
     onValueChange: (String) -> Unit
@@ -47,6 +45,7 @@ fun UsernameInput(
     TextField(
         value = currentValue,
         onValueChange = onValueChange,
+        isError = isError,
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester ?: FocusRequester())
@@ -76,12 +75,14 @@ fun UsernameInput(
             unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            errorTextColor = MaterialTheme.colorScheme.onBackground,
             focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
             unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
             unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            errorIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         )
@@ -94,6 +95,7 @@ fun EmailInput(
     label: String,
     icon: ImageVector,
     currentValue: String,
+    isError: Boolean,
     focusRequester: FocusRequester? = null,
     keyboardActions: KeyboardActions,
     onValueChange: (String) -> Unit
@@ -101,6 +103,7 @@ fun EmailInput(
     TextField(
         value = currentValue,
         onValueChange = onValueChange,
+        isError = isError,
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester ?: FocusRequester())
@@ -130,10 +133,12 @@ fun EmailInput(
             unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            errorTextColor = MaterialTheme.colorScheme.onBackground,
             focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
             unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            errorIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
@@ -208,6 +213,8 @@ fun PasswordInput(
             unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
+//            errorContainerColor = MaterialTheme.colorScheme.background,
+            errorIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )

@@ -142,7 +142,7 @@ fun HomeScreen(
             if (currentRoute == BottomBarScreen.Home.route) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        navController.navigate(Graph.HOME_ADD_PET)
+                        navController.navigate(Graph.HOME_PET_ADD)
                     },
                     modifier = Modifier
                 ) {

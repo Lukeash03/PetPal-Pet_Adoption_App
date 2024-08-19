@@ -26,9 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -49,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -129,16 +127,16 @@ fun LoginScreen(
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.login_pic_large_2),
+                painter = painterResource(id = R.drawable.login_pic),
                 contentDescription = "logo",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
                     .fillMaxSize()
                     .offset(y = 10.dp)
-//                    .graphicsLayer(
-//                        scaleX = 1.05f,
-//                        scaleY = 1.05f
-//                    )
+                    .graphicsLayer(
+                        scaleX = 1.05f,
+                        scaleY = 1.05f
+                    )
             )
         }
 
@@ -196,6 +194,7 @@ fun LoginScreen(
                     label = stringResource(id = R.string.label_email),
                     icon = AppIcons.Email,
                     currentValue = email,
+                    isError = false,
                     keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
                     onValueChange = { email = it }
                 )

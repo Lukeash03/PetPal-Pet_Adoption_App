@@ -2,6 +2,7 @@ package com.luke.petpal.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,10 @@ import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.cardColorPrimaryLight
 
 @Composable
-fun AdoptionPetCard(pet: Pet) {
+fun AdoptionPetCard(
+    pet: Pet,
+    onSeeMoreClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
@@ -61,7 +65,7 @@ fun AdoptionPetCard(pet: Pet) {
                 Image(
                     painter = painter,
                     contentDescription = "Pet Image",
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillBounds
                 )
             }
 
@@ -99,7 +103,11 @@ fun AdoptionPetCard(pet: Pet) {
 
             Text(
                 modifier = Modifier
-                    .align(Alignment.Bottom),
+                    .align(Alignment.Bottom)
+                    .padding(end = 8.dp)
+                    .clickable {
+
+                    },
                 text = "See more >",
                 color = MaterialTheme.colorScheme.background,
                 textDecoration = TextDecoration.Underline
@@ -123,6 +131,6 @@ fun PetCardPreview() {
                 color = "White",
                 photos = null
             )
-        )
+        ) { }
     }
 }

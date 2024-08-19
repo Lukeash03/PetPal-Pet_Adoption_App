@@ -15,6 +15,7 @@ import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.ProfileImageRepository
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
+import com.luke.petpal.domain.repository.usecase.ValidateUsername
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
 import com.luke.petpal.presentation.auth.googlesignin.SignInResult
 import com.luke.petpal.presentation.auth.googlesignin.SignInState
@@ -35,6 +36,7 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileImageRepository: ProfileImageRepository,
     private val googleAuthUIClient: GoogleAuthUIClient,
+    private val validateUsername: ValidateUsername = ValidateUsername(),
     private val validateEmail: ValidateEmail = ValidateEmail(),
     private val validatePassword: ValidatePassword = ValidatePassword()
 ) : ViewModel() {
@@ -92,6 +94,10 @@ class AuthViewModel @Inject constructor(
 
     fun onEvent(event: RegistrationFormEvent) {
         when(event) {
+
+            is RegistrationFormEvent.UsernameChanged -> {
+                state = state.copy(username = event.username)
+            }
             is RegistrationFormEvent.EmailChanged -> {
                 state = state.copy(email = event.email)
             }
@@ -101,20 +107,24 @@ class AuthViewModel @Inject constructor(
             is RegistrationFormEvent.Submit -> {
                 submitData()
             }
+
         }
     }
 
     private fun submitData() {
+        val usernameResult = validateUsername.execute(state.username)
         val emailResult = validateEmail.execute(state.email)
         val passwordResult = validatePassword.execute(state.password)
 
         val hasError = listOf(
+            usernameResult,
             emailResult,
             passwordResult
         ).any() { !it.successful }
 
         if (hasError) {
             state = state.copy(
+                usernameError = usernameResult.errorMessage,
                 emailError = emailResult.errorMessage,
                 passwordError = passwordResult.errorMessage
             )

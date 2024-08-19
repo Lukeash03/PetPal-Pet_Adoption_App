@@ -9,5 +9,6 @@ interface HomeRepository {
     val currentUser: FirebaseUser?
     suspend fun uploadPet(pet: Pet): Resource<Unit>
     suspend fun fetchPetList(): Resource<List<Pet>>
+    suspend fun fetchPetById(petId: String): Resource<Pet?>
     fun logout()
 }
