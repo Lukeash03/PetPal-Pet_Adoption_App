@@ -9,6 +9,7 @@ import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.HomeRepository
 import com.luke.petpal.data.repository.ProfileImageRepository
 import com.luke.petpal.domain.data.Pet
+import com.luke.petpal.domain.data.User
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +42,11 @@ class HomeViewModel @Inject constructor(
     private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
     val petList: StateFlow<List<Pet>?> = _petList
 
-    private val _petById = MutableStateFlow<Pet?>(null)
-    val petById: StateFlow<Pet?> = _petById
+    private val _petByIdFlow = MutableStateFlow<Resource<Pet>?>(null)
+    val petById: StateFlow<Resource<Pet>?> = _petByIdFlow
+
+    private val _userById = MutableStateFlow<User?>(null)
+    val userById: StateFlow<User?> = _userById
 
     init {
         fetchAllPets()
@@ -84,7 +88,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun fetchAllPets() {
+    fun fetchAllPets() {
         viewModelScope.launch {
             val result = homeRepository.fetchPetList()
             Log.i("MYTAG", result.toString())
@@ -98,10 +102,18 @@ class HomeViewModel @Inject constructor(
 
     fun fetchPetById(petId: String) {
         viewModelScope.launch {
+            _petByIdFlow.value = Resource.Loading
             val result = homeRepository.fetchPetById(petId)
             Log.i("MYTAG", "FetchPetById: $result")
-            if (result is Resource.Success<*>) {
-                _petById.value = result.result as Pet?
+            _petByIdFlow.value = result
+        }
+    }
+
+    fun fetchUserById(userId: String?) {
+        viewModelScope.launch {
+            val result = userId?.let { homeRepository.fetchUserById(it) }
+            if (result is Resource.Success) {
+                _userById.value = result.result
             }
         }
     }

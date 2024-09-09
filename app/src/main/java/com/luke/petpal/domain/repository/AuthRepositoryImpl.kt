@@ -1,15 +1,13 @@
 package com.luke.petpal.domain.repository
 
-import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.data.utils.await
+import com.luke.petpal.data.utils.awaitC
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -22,7 +20,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun login(email: String, password: String): Resource<FirebaseUser> {
         return try {
-            val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            val result = firebaseAuth.signInWithEmailAndPassword(email, password).awaitC()
             Resource.Success(result.user!!)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -36,11 +34,11 @@ class AuthRepositoryImpl @Inject constructor(
         password: String
     ): Resource<FirebaseUser> {
         return try {
-            val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            val result = firebaseAuth.createUserWithEmailAndPassword(email, password).awaitC()
             result?.user?.updateProfile(
                 UserProfileChangeRequest.Builder().setDisplayName(username).build()
-            )?.await()
-            result?.user?.sendEmailVerification()?.await()
+            )?.awaitC()
+            result?.user?.sendEmailVerification()?.awaitC()
 
             createUserProfile(result.user!!)
 
@@ -69,7 +67,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun isEmailVerified(): Boolean? {
         return try {
             val user = firebaseAuth.currentUser
-            user?.reload()?.await()
+            user?.reload()?.awaitC()
             user?.isEmailVerified
         } catch (e: Exception) {
             e.printStackTrace()
@@ -79,7 +77,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun resendEmailVerification(): Resource<Unit> {
         return try {
-            firebaseAuth.currentUser?.sendEmailVerification()?.await()
+            firebaseAuth.currentUser?.sendEmailVerification()?.awaitC()
             Resource.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -89,7 +87,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun sendPasswordResetEmail(email: String): Resource<Unit> {
         return try {
-            firebaseAuth.sendPasswordResetEmail(email).await()
+            firebaseAuth.sendPasswordResetEmail(email).awaitC()
             Resource.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()

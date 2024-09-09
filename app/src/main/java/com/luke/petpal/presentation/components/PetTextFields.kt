@@ -1,35 +1,31 @@
 package com.luke.petpal.presentation.components
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import java.util.Calendar
 
 @Composable
 fun PetDetailsTextField(
@@ -39,6 +35,7 @@ fun PetDetailsTextField(
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     imeAction: ImeAction = ImeAction.Next,
+    minLines: Int = 1
 ) {
     TextField(
         value = value,
@@ -47,6 +44,7 @@ fun PetDetailsTextField(
         keyboardOptions = keyboardOptions.copy(imeAction = imeAction),
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
+        minLines = minLines,
         colors = TextFieldDefaults.colors(
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.5f),
             focusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.6f),
@@ -101,7 +99,6 @@ fun PetDetailsDropdownTextField(
                     .menuAnchor()
                     .clickable {
                         onExpandedChange(true)
-//                        focusRequester.requestFocus()
                     }
                     .focusRequester(focusRequester),
                 shape = RoundedCornerShape(10.dp),
@@ -142,32 +139,25 @@ fun PetDetailsDropdownTextField(
 
 @Composable
 fun PetDetailsTextFieldWithDatePicker(
-    value: String,
-    onValueChange: (String) -> Unit,
+    formattedDate: String,
+    onCalenderClick: () -> Unit,
     label: String,
     modifier: Modifier = Modifier
 ) {
-    var selectedDate by remember { mutableStateOf(value) }
-
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    val datePickerDialog = DatePickerDialog(
-        LocalContext.current,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
-            selectedDate = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
-            onValueChange(selectedDate)
-        }, year, month, day
-    )
-
     TextField(
-        value = selectedDate,
+        value = formattedDate,
         onValueChange = {},
         label = { Text(text = label) },
-        modifier = modifier.clickable {
-            datePickerDialog.show()
+        modifier = modifier,
+        trailingIcon = {
+            IconButton(onClick = {
+                onCalenderClick()
+            }) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = "Calender icon"
+                )
+            }
         },
         shape = RoundedCornerShape(10.dp),
         readOnly = true,

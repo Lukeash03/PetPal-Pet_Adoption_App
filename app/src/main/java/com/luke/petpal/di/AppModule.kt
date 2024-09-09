@@ -2,7 +2,10 @@ package com.luke.petpal.di
 
 import android.content.Context
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.repository.AuthRepository
@@ -40,6 +43,9 @@ class AppModule {
 
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides
+    fun provideFirebaseDatabase(): FirebaseDatabase = Firebase.database("\"https://petpal-pet-adoption-default-rtdb.asia-southeast1.firebasedatabase.app\"")
 
     @Provides
     fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()

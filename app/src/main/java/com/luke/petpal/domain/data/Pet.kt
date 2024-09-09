@@ -1,14 +1,17 @@
 package com.luke.petpal.domain.data
 
-import android.net.Uri
-
 data class Pet(
+    val documentId: String? = null,
+    val userId: String? = null,
     val name: String? = null,
     val species: String? = null,
     val breed: String? = null,
     val gender: String? = null,
-    val age: Int? = null,
+    val dob: Long? = null,
     val weight: Int? = null,
     val color: String? = null,
-    var photos: List<String>? = null
+    var photos: List<String>? = null,
+    val vaccinationStatus: Boolean? = null,
+    val publishDate: Long? = null,
+    val description: String? = null
 )

@@ -1,9 +1,7 @@
-package com.luke.petpal
+package com.luke.petpal.navigation
 
-import android.graphics.drawable.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Pets
@@ -14,25 +12,25 @@ sealed class BottomBarScreen(
     val title: String,
     val icon: ImageVector
 ) {
-    object Home : BottomBarScreen(
+    data object Home : BottomBarScreen(
         "HOME",
         "HOME",
         Icons.Default.Home
     )
 
-    object Liked : BottomBarScreen(
+    data object Liked : BottomBarScreen(
         "Liked",
         "Liked",
         Icons.Default.HeartBroken
     )
 
-    object Chat : BottomBarScreen(
+    data object Chat : BottomBarScreen(
         "Chat",
         "Chat",
         Icons.AutoMirrored.Filled.Chat
     )
 
-    object Personal : BottomBarScreen(
+    data object Personal : BottomBarScreen(
         "Personal",
         "Personal",
         Icons.Default.Pets

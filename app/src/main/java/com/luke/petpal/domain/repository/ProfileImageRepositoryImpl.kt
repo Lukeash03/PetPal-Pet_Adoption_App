@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.ProfileImageRepository
-import com.luke.petpal.data.utils.await
+import com.luke.petpal.data.utils.awaitC
 import javax.inject.Inject
 
 class ProfileImageRepositoryImpl @Inject constructor(
@@ -25,8 +25,8 @@ class ProfileImageRepositoryImpl @Inject constructor(
         return try {
             val storageRef =
                 storage.reference.child("profileImages/${firebaseAuth.currentUser?.uid}")
-            val uploadTask = storageRef.putFile(uri).await()
-            val downloadUrl = uploadTask.storage.downloadUrl.await()
+            val uploadTask = storageRef.putFile(uri).awaitC()
+            val downloadUrl = uploadTask.storage.downloadUrl.awaitC()
             Resource.Success(downloadUrl.toString())
         } catch (e: Exception) {
             e.printStackTrace()
@@ -41,12 +41,12 @@ class ProfileImageRepositoryImpl @Inject constructor(
             val userProfileChangeRequest = UserProfileChangeRequest.Builder()
                 .setPhotoUri(Uri.parse(url))
                 .build()
-            user?.updateProfile(userProfileChangeRequest)?.await()
+            user?.updateProfile(userProfileChangeRequest)?.awaitC()
 
             Log.i("MyTag", "UpdateProfileUrl: UserId: $user Started")
 
             user?.uid?.let { uid ->
-                firestore.collection("users").document(uid).update("profileImageUrl", url).await()
+                firestore.collection("users").document(uid).update("profileImageUrl", url).awaitC()
                 Log.i("MyTag", "UpdateProfileUrl: Firestore updated with new profileImageUrl")
             }
 
@@ -63,7 +63,7 @@ class ProfileImageRepositoryImpl @Inject constructor(
             firebaseAuth.currentUser ?: return Resource.Failure(Exception("User is not logged in"))
 
         return try {
-            val documentSnapshot = firestore.collection("users").document(user.uid).get().await()
+            val documentSnapshot = firestore.collection("users").document(user.uid).get().awaitC()
             Log.i("MyTag", "fetchProfileUrl: ${documentSnapshot.exists()}")
             val profileImageUrl = documentSnapshot.getString("profileImageUrl")
             if (profileImageUrl != null) {

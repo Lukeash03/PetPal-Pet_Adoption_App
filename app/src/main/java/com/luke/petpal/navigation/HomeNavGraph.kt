@@ -7,10 +7,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
-import com.luke.petpal.BottomBarScreen
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.screens.AddPetScreen
 import com.luke.petpal.presentation.screens.AdoptionScreen
+import com.luke.petpal.presentation.chat.ChatHomeScreen
 import com.luke.petpal.presentation.screens.DetailedPetScreen
 import com.luke.petpal.presentation.screens.PersonalScreen
 
@@ -29,21 +29,12 @@ fun HomeNavGraph(
             AdoptionScreen(
                 homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
-                onClick = {
-                    navController.navigate(Graph.HOME_PET_ADD)
+                onSeeMoreClick = { documentId ->
+                    navController.navigate("pet_detailed/$documentId")
                 }
             )
         }
-        composable(route = BottomBarScreen.Liked.route) {
-//            AdoptionScreen(name = BottomBarScreen.Liked.route, paddingValues)
-        }
-        composable(route = BottomBarScreen.Chat.route) {
-//            AdoptionScreen(name = BottomBarScreen.Chat.route, paddingValues)
-        }
-        composable(route = BottomBarScreen.Personal.route) {
-            PersonalScreen(homeViewModel)
-        }
-        composable(route = Graph.HOME_PET_ADD) {
+        composable(route = "add_pet") {
             AddPetScreen(
                 homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
@@ -52,11 +43,28 @@ fun HomeNavGraph(
                 }
             )
         }
-        composable(route = Graph.HOME_PET_DETAILED) {
-            DetailedPetScreen(
-                homeViewModel = homeViewModel,
-                paddingValues = paddingValues,
+        composable(route = "pet_detailed/{documentId}") { backStackEntry ->
+            val documentId = backStackEntry.arguments?.getString("documentId")
+            documentId?.let {
+                DetailedPetScreen(
+                    homeViewModel = homeViewModel,
+                    paddingValues = paddingValues,
+                    petDocumentId = it
+                )
+            }
+        }
+        composable(route = BottomBarScreen.Liked.route) {
+//            AdoptionScreen(name = BottomBarScreen.Liked.route, paddingValues)
+        }
+        composable(route = BottomBarScreen.Chat.route) {
+            ChatHomeScreen(
+                navController = navController,
+                paddingValues = paddingValues
             )
+        }
+//        composable(route = Graph.)
+        composable(route = BottomBarScreen.Personal.route) {
+            PersonalScreen(homeViewModel)
         }
     }
 

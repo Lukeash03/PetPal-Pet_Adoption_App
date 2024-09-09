@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,12 +37,11 @@ import com.luke.petpal.presentation.theme.cardColorPrimaryLight
 @Composable
 fun AdoptionPetCard(
     pet: Pet,
-    onSeeMoreClick: () -> Unit
+    onSeeMoreClick: (String?) -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
-//            .height(104.dp),
     ) {
         Row(
             modifier = Modifier
@@ -72,8 +70,7 @@ fun AdoptionPetCard(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = pet.name ?: "Waffles",
@@ -106,7 +103,7 @@ fun AdoptionPetCard(
                     .align(Alignment.Bottom)
                     .padding(end = 8.dp)
                     .clickable {
-
+                        onSeeMoreClick(pet.documentId)
                     },
                 text = "See more >",
                 color = MaterialTheme.colorScheme.background,
@@ -126,10 +123,11 @@ fun PetCardPreview() {
                 species = "Dog",
                 breed = "Labrador",
                 gender = "Male",
-                age = 2,
+                dob = 2,
                 weight = 10,
                 color = "White",
-                photos = null
+                photos = null,
+                documentId = ""
             )
         ) { }
     }

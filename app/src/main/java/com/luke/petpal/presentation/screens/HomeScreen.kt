@@ -43,7 +43,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.luke.petpal.BottomBarScreen
+import com.luke.petpal.navigation.BottomBarScreen
 import com.luke.petpal.R
 import com.luke.petpal.navigation.Graph
 import com.luke.petpal.navigation.HomeNavGraph
@@ -59,7 +59,8 @@ fun HomeScreen(
     homeViewModel: HomeViewModel?,
     navController: NavHostController = rememberNavController(),
     logout: () -> Unit,
-    activity: Activity
+    activity: Activity,
+    splashScreenCompleted: Boolean
 ) {
 
     BackHandler {
@@ -69,14 +70,16 @@ fun HomeScreen(
     val systemUiController = rememberSystemUiController()
     val statusBarColor = appColorPrimary
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(splashScreenCompleted) {
         Log.d("HomeScreen", "Setting status bar and navigation bar color")
-        systemUiController.setStatusBarColor(
-            color = statusBarColor,
-        )
-        systemUiController.setNavigationBarColor(
-            color = statusBarColor,
-        )
+        if (splashScreenCompleted) {
+            systemUiController.setStatusBarColor(
+                color = statusBarColor,
+            )
+            systemUiController.setNavigationBarColor(
+                color = statusBarColor,
+            )
+        }
     }
 
     var showDialog by remember { mutableStateOf(false) }
@@ -123,7 +126,7 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -142,7 +145,7 @@ fun HomeScreen(
             if (currentRoute == BottomBarScreen.Home.route) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        navController.navigate(Graph.HOME_PET_ADD)
+                        navController.navigate("add_pet")
                     },
                     modifier = Modifier
                 ) {
@@ -228,7 +231,13 @@ fun RowScope.AddItem(
 @Composable
 fun HomeScreenPreviewLight() {
     PetPalTheme {
-        HomeScreen(null, rememberNavController(), activity = Activity(), logout = { })
+        HomeScreen(
+            null,
+            rememberNavController(),
+            logout = { },
+            activity = Activity(),
+            true
+        )
     }
 }
 
@@ -236,6 +245,12 @@ fun HomeScreenPreviewLight() {
 @Composable
 fun HomeScreenPreviewDark() {
     AppTheme {
-        HomeScreen(null, rememberNavController(), logout = { }, activity = Activity())
+        HomeScreen(
+            null,
+            rememberNavController(),
+            logout = { },
+            activity = Activity(),
+            true
+        )
     }
 }
