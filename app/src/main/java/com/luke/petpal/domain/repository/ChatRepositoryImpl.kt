@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.luke.petpal.data.repository.ChatRepository
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class ChatRepositoryImpl @Inject constructor(
@@ -17,21 +18,26 @@ class ChatRepositoryImpl @Inject constructor(
     override val currentUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
-    override suspend fun createOrJoinChat(participants: List<String>) {
-//        val chatQuery = firestore
+    override suspend fun createOrJoinChat(userAId: String, userBId: String): String {
+        val chatId = if (userAId < userBId) "{$userAId}_$userBId" else "{$userBId}_$userAId"
 
-        val chatData = hashMapOf(
-            "participants" to participants,
-            "lastMessage" to "",
-            "timestamp" to FieldValue.serverTimestamp()
-        )
-        firestore.collection("chats").add(chatData)
-            .addOnSuccessListener { documentReference ->
-                Log.d("MYTAG", "Chat created with ID: ${documentReference.id}")
-            }
-            .addOnFailureListener { e ->
-                Log.w("MYTAG", "Error adding document", e)
-            }
+        // Reference to the chat document
+        val chatRef = firestore.collection("chats").document(chatId)
+
+        // Check if chat already exists
+        val chatSnapshot = chatRef.get().await()
+        if (!chatSnapshot.exists()) {
+            // If the chat doesn't exist, create it
+            val chatData = hashMapOf(
+                "chatId" to chatId,
+                "participants" to listOf(userAId, userBId),
+                "lastMessage" to "",
+                "lastMessageTimestamp" to System.currentTimeMillis()
+            )
+            chatRef.set(chatData).await()
+        }
+
+        return chatId
     }
 
     override suspend fun sendMessage(chatId: String, senderId: String, message: String) {

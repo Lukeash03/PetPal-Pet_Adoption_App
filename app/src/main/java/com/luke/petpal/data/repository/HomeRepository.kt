@@ -9,8 +9,10 @@ import com.luke.petpal.domain.data.User
 interface HomeRepository {
     val currentUser: FirebaseUser?
     suspend fun uploadPet(pet: Pet): Resource<Unit>
-    suspend fun fetchPetList(): Resource<List<Pet>>
+    suspend fun fetchPetList(species: String? = null): Resource<List<Pet>>
     suspend fun fetchPetById(petId: String): Resource<Pet>
     suspend fun fetchUserById(userId: String): Resource<User>
+    suspend fun isPetLiked(petId: String): Boolean
+    suspend fun toggleLike(petId: String): Resource<Unit>
     fun logout()
 }

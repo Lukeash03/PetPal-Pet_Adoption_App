@@ -49,7 +49,10 @@ fun HomeNavGraph(
                 DetailedPetScreen(
                     homeViewModel = homeViewModel,
                     paddingValues = paddingValues,
-                    petDocumentId = it
+                    petDocumentId = it,
+                    onChatClick = { chatId ->
+                        navController.navigate("chat_screen/$chatId")
+                    }
                 )
             }
         }
@@ -62,7 +65,9 @@ fun HomeNavGraph(
                 paddingValues = paddingValues
             )
         }
-//        composable(route = Graph.)
+        composable(route = "chat_screen/{chatId}") {
+
+        }
         composable(route = BottomBarScreen.Personal.route) {
             PersonalScreen(homeViewModel)
         }

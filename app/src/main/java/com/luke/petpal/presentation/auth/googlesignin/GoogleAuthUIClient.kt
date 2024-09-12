@@ -46,7 +46,8 @@ class GoogleAuthUIClient(
             user?.let {
                 // Create or update Firestore document for the user
                 val userData = UserData(
-                    userId = it.uid,
+                    uid = it.uid,
+                    email = it.email,
                     username = it.displayName,
                     profileImageUrl = it.photoUrl?.toString()
                 )
@@ -57,6 +58,7 @@ class GoogleAuthUIClient(
                 data = user?.run {
                     UserData(
                         uid,
+                        email,
                         displayName,
                         photoUrl?.toString()
                     )
@@ -96,14 +98,6 @@ class GoogleAuthUIClient(
             e.printStackTrace()
             if (e is CancellationException) throw e
         }
-    }
-
-    fun getSignedInUser(): UserData? = auth.currentUser?.run {
-        UserData(
-            userId = uid,
-            username = displayName,
-            profileImageUrl = photoUrl?.toString()
-        )
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {

@@ -103,7 +103,7 @@ fun AdoptionPetCard(
                     .align(Alignment.Bottom)
                     .padding(end = 8.dp)
                     .clickable {
-                        onSeeMoreClick(pet.documentId)
+                        onSeeMoreClick(pet.id)
                     },
                 text = "See more >",
                 color = MaterialTheme.colorScheme.background,
@@ -127,7 +127,7 @@ fun PetCardPreview() {
                 weight = 10,
                 color = "White",
                 photos = null,
-                documentId = ""
+                id = ""
             )
         ) { }
     }

@@ -38,6 +38,7 @@ class AuthRepositoryImpl @Inject constructor(
             result?.user?.updateProfile(
                 UserProfileChangeRequest.Builder().setDisplayName(username).build()
             )?.awaitC()
+
             result?.user?.sendEmailVerification()?.awaitC()
 
             createUserProfile(result.user!!)
@@ -53,7 +54,8 @@ class AuthRepositoryImpl @Inject constructor(
         val userProfile = mapOf(
             "uid" to user.uid,
             "email" to user.email,
-            "profileImageUrl" to "" // or default URL if any
+            "username" to user.displayName,
+            "profileImageUrl" to ""
         )
         firestore.collection("users").document(user.uid).set(userProfile)
             .addOnSuccessListener {

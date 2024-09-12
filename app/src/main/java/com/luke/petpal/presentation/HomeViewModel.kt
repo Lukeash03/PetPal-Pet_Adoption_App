@@ -42,14 +42,23 @@ class HomeViewModel @Inject constructor(
     private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
     val petList: StateFlow<List<Pet>?> = _petList
 
+    private val _selectedSpecies = MutableStateFlow<String?>(null)
+    val selectedSpecies: StateFlow<String?> = _selectedSpecies
+
     private val _petByIdFlow = MutableStateFlow<Resource<Pet>?>(null)
     val petById: StateFlow<Resource<Pet>?> = _petByIdFlow
 
     private val _userById = MutableStateFlow<User?>(null)
     val userById: StateFlow<User?> = _userById
 
+    private val _isLiked = MutableStateFlow(false)
+    val isLiked: StateFlow<Boolean> = _isLiked
+
+    private val _likeStatus = MutableStateFlow<Resource<Unit>?>(null)
+    val likeStatus: StateFlow<Resource<Unit>?> = _likeStatus
+
     init {
-        fetchAllPets()
+        fetchPets()
     }
 
     val currentUser: FirebaseUser? get() = homeRepository.currentUser
@@ -88,9 +97,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun fetchAllPets() {
+    fun fetchPets() {
         viewModelScope.launch {
-            val result = homeRepository.fetchPetList()
+            val species = _selectedSpecies.value
+            val result = homeRepository.fetchPetList(species)
             Log.i("MYTAG", result.toString())
             if (result is Resource.Success) {
                 _petList.value = result.result
@@ -100,12 +110,21 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun setSpeciesFilter(species: String?) {
+        _selectedSpecies.value = species
+        fetchPets()
+    }
+
     fun fetchPetById(petId: String) {
         viewModelScope.launch {
-            _petByIdFlow.value = Resource.Loading
-            val result = homeRepository.fetchPetById(petId)
-            Log.i("MYTAG", "FetchPetById: $result")
-            _petByIdFlow.value = result
+            try {
+                _petByIdFlow.value = Resource.Loading
+                val result = homeRepository.fetchPetById(petId)
+                Log.i("MYTAG", "FetchPetById: $result")
+                _petByIdFlow.value = result
+            } catch (e: Exception) {
+                _petByIdFlow.value = Resource.Failure(e)
+            }
         }
     }
 
@@ -118,4 +137,21 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-}
+    fun checkIfLiked(petId: String) {
+        viewModelScope.launch {
+            // Fetch from repository if pet is already liked
+            val isPetLiked = homeRepository.isPetLiked(petId)
+            _isLiked.value = isPetLiked
+        }
+    }
+
+    fun toggleLike(petId: String) {
+        viewModelScope.launch {
+            _likeStatus.value = Resource.Loading
+            val result = homeRepository.toggleLike(petId)
+            _likeStatus.value = result
+            if (result is Resource.Success) {
+                _isLiked.value = !_isLiked.value // Flip the liked status
+            }
+        }
+    }}

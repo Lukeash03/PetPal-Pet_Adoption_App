@@ -21,48 +21,33 @@ class ChatViewModel @Inject constructor(
     private val firebaseDatabase: FirebaseDatabase
 ) : ViewModel() {
 
-    private val _channels = MutableStateFlow<List<Channel>>(emptyList())
-    val channels = _channels.asStateFlow()
-
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages = _messages.asStateFlow()
 
-    init {
-        getChannels()
-    }
-
-    private fun getChannels() {
-        firebaseDatabase.getReference("channel").get().addOnSuccessListener {
-            val list = mutableListOf<Channel>()
-            it.children.forEach { data ->
-                val channel = Channel(data.key!!, data.value.toString())
-                list.add(channel)
-            }
-            Log.d("MYTAG", "Channels: $list")
-            _channels.value = list
-        }
-    }
-
-    fun addChannel(name: String) {
-        val key = firebaseDatabase.getReference("channel").push().key
-        firebaseDatabase.getReference("channel").child(key!!).setValue(name).addOnSuccessListener {
-            getChannels()
-        }
-    }
-
-
-    fun sendMessage(channelId: String, messageText: String) {
+    fun sendMessage(receiverId: String, messageText: String) {
+        val senderId = Firebase.auth.currentUser?.uid ?: return
+        val chatId = generateChatId(senderId, receiverId)
         val message = Message(
             id = firebaseDatabase.reference.push().key ?: UUID.randomUUID().toString(),
-            senderId = Firebase.auth.currentUser?.uid ?: "",
+            senderId = senderId,
             message = messageText,
             createdAt = System.currentTimeMillis(),
             senderName = Firebase.auth.currentUser?.displayName ?: "",
             senderImage = null,
             imageUrl = null
         )
-        val key = firebaseDatabase.getReference("messages").child(channelId).push().setValue(message)
+        firebaseDatabase.getReference("chats").child(chatId).child("messages").push().setValue(message)
     }
+
+    private fun generateChatId(user1: String, user2: String): String {
+        return if (user1 < user2) {
+            "${user1}_$user2"
+        } else {
+            "${user2}_$user1"
+        }
+    }
+
+
     fun listenForMessages(channelId: String) {
         firebaseDatabase.getReference("messages").child(channelId).orderByChild("createdAt")
             .addValueEventListener(object : ValueEventListener {

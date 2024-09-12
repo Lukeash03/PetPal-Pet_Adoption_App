@@ -4,7 +4,7 @@ import com.google.firebase.auth.FirebaseUser
 
 interface ChatRepository {
     val currentUser: FirebaseUser?
-    suspend fun createOrJoinChat(participants: List<String>)
+    suspend fun createOrJoinChat(userAId: String, userBId: String): String
     suspend fun sendMessage(chatId: String, senderId: String, message: String)
     suspend fun listenForMessages(chatId: String)
 }

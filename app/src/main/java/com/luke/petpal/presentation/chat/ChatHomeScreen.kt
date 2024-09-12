@@ -24,7 +24,6 @@ fun ChatHomeScreen(
     paddingValues: PaddingValues
 ) {
     val chatViewModel: ChatViewModel = hiltViewModel()
-    val channels = chatViewModel.channels.collectAsState()
 
     Scaffold {
         Box(
@@ -35,23 +34,23 @@ fun ChatHomeScreen(
             LazyColumn(
                 modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
             ) {
-                items(channels.value) { channel ->
-                    Column {
-                        Text(
-                            text = channel.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(appColorPrimary.copy(0.5f))
-                                .clickable {
-
-                                }
-                                .padding(16.dp),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
+//                items(channels.value) { channel ->
+//                    Column {
+//                        Text(
+//                            text = channel.name,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(8.dp)
+//                                .clip(RoundedCornerShape(16.dp))
+//                                .background(appColorPrimary.copy(0.5f))
+//                                .clickable {
+//
+//                                }
+//                                .padding(16.dp),
+//                            color = MaterialTheme.colorScheme.onBackground
+//                        )
+//                    }
+//                }
             }
         }
     }
