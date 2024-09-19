@@ -85,10 +85,67 @@ class HomeRepositoryImpl @Inject constructor(
                     )
                 }
 
-            Log.i("MYTAG", "fetchPetList petList: $petList ")
+            Log.i("MYTAG", "fetchPetList: $petList ")
             Resource.Success(petList)
         } catch (e: Exception) {
             Log.i("MYTAG", "fetchPetList: $e")
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun fetchUserPetList(species: String?): Resource<List<Pet>> {
+        return try {
+            Log.i("MYTAG", "fetchUserPetList-> ${currentUser?.uid.toString()}")
+            val query = if (species != null) {
+                firestore.collection("pets")
+                    .whereEqualTo("userId", currentUser?.uid.toString())
+                    .whereEqualTo("species", species)
+            } else {
+                firestore.collection("pets")
+                    .whereEqualTo("userId", currentUser?.uid.toString())
+            }
+
+            val petList = query.get()
+                .await()
+                .documents
+                .mapNotNull { document ->
+                    val pet = document.toObject(Pet::class.java)
+                    pet?.copy(
+                        photos = pet.photos?.map { it } ?: emptyList(),
+                        id = document.id
+                    )
+                }
+
+            Log.i("MYTAG", "fetchUserPetList: $petList ")
+            Resource.Success(petList)
+        } catch (e: Exception) {
+            Log.i("MYTAG", "fetchUserPetList: $e")
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun fetchLikedPetList(): Resource<List<Pet>> {
+        return try {
+            val userId = currentUser?.uid.toString()
+            val likedPetIds = firestore.collection("users")
+                .document(userId)
+                .collection("likedPets")
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.getString("petId") }
+
+            val petList = likedPetIds.mapNotNull { petId ->
+                val petDocument = firestore.collection("pets")
+                    .document(petId)
+                    .get()
+                    .await()
+                petDocument.toObject(Pet::class.java)?.copy(id = petId)
+            }
+            Log.i("MYTAG", "fetchLikedPetList petList: $petList ")
+            Resource.Success(petList)
+        } catch (e: Exception) {
+            Log.i("MYTAG", "fetchLikedPets: $e")
             Resource.Failure(e)
         }
     }
@@ -139,7 +196,8 @@ class HomeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun toggleLike(petId: String): Resource<Unit> {
-        val likesRef = firestore.collection("users").document(currentUser?.uid!!).collection("likedPets")
+        val likesRef =
+            firestore.collection("users").document(currentUser?.uid!!).collection("likedPets")
 
         return try {
             val likedPetDoc = likesRef.document(petId).get().await()

@@ -42,6 +42,12 @@ class HomeViewModel @Inject constructor(
     private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
     val petList: StateFlow<List<Pet>?> = _petList
 
+    private val _userPetList = MutableStateFlow<List<Pet>?>(emptyList())
+    val userPetList: StateFlow<List<Pet>?> = _userPetList
+
+    private val _likedPetList = MutableStateFlow<List<Pet>?>(emptyList())
+    val likedPetList: StateFlow<List<Pet>?> = _likedPetList
+
     private val _selectedSpecies = MutableStateFlow<String?>(null)
     val selectedSpecies: StateFlow<String?> = _selectedSpecies
 
@@ -106,6 +112,30 @@ class HomeViewModel @Inject constructor(
                 _petList.value = result.result
             } else {
                 // Handle error
+            }
+        }
+    }
+
+    fun fetchUserPets() {
+        viewModelScope.launch {
+            val species = _selectedSpecies.value
+            val result = homeRepository.fetchUserPetList(species)
+            Log.i("MYTAG", result.toString())
+            if (result is Resource.Success) {
+                _userPetList.value = result.result
+            } else {
+                // Handle error
+            }
+        }
+    }
+
+    fun fetchLikedPets() {
+        viewModelScope.launch {
+            val result = homeRepository.fetchLikedPetList()
+            if (result is Resource.Success) {
+                _likedPetList.value = result.result
+            } else {
+                // error
             }
         }
     }

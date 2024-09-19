@@ -19,18 +19,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,21 +49,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun AdoptionScreen(
+fun MyAdoptionPetScreen(
     homeViewModel: HomeViewModel?,
     paddingValues: PaddingValues,
-    onMyPostClick: () -> Unit,
     onSeeMoreClick: (String) -> Unit
 ) {
-
-    Log.i("MYTAG", "Inside AdoptionScreen")
+    Log.i("MYTAG", "Inside MyAdoptionPetScreen")
+    homeViewModel?.fetchUserPets()
     val refreshScope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
 
     fun refresh() = refreshScope.launch {
         refreshing = true
         delay(500)
-        homeViewModel?.fetchPets()
+        homeViewModel?.fetchUserPets()
         refreshing = false
     }
 
@@ -73,8 +71,10 @@ fun AdoptionScreen(
         onRefresh = ::refresh
     )
 
-    val petList = homeViewModel?.petList?.collectAsState(emptyList())?.value ?: emptyList()
+//    val userId = homeViewModel?.currentUser?.uid.toString()
+    val userPetList = homeViewModel?.userPetList?.collectAsState(emptyList())?.value ?: emptyList()
     val selectedSpecies = homeViewModel?.selectedSpecies?.collectAsState()
+    Log.i("MYTAG", "Pet List: $userPetList")
 
     Box(
         modifier = Modifier
@@ -188,20 +188,12 @@ fun AdoptionScreen(
                 )
             }
 
-            Button(
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier,
-                onClick = { onMyPostClick() }
-            ) {
-                Text(text = "My Posts")
-            }
-
             LazyColumn(
                 modifier = Modifier.padding()
             ) {
                 if (!refreshing) {
-                    items(petList) { pet ->
-                        Log.i("MYTAG", "Inside lazy column: $pet")
+                    items(userPetList) { pet ->
+                        Log.i("MYTAG", "Inside MyPet lazy column: $pet")
                         AdoptionPetCard(
                             pet = pet,
                             onSeeMoreClick = { documentId ->
@@ -226,10 +218,11 @@ fun AdoptionScreen(
 
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun AdoptionScreenPreview() {
+fun MyAdoptionPetScreenPreview() {
     PetPalTheme {
-        AdoptionScreen(homeViewModel = null, paddingValues = PaddingValues(10.dp), { }) { }
+        MyAdoptionPetScreen(homeViewModel = null, paddingValues = PaddingValues(10.dp)) { }
     }
 }

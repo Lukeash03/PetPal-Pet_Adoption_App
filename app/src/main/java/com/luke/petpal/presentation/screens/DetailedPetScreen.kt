@@ -1,12 +1,12 @@
 @file:OptIn(
     ExperimentalFoundationApi::class, ExperimentalFoundationApi::class,
-    ExperimentalFoundationApi::class
+    ExperimentalFoundationApi::class, ExperimentalFoundationApi::class
 )
 
 package com.luke.petpal.presentation.screens
 
 import android.content.res.Configuration
-import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -69,7 +69,8 @@ import java.time.format.DateTimeFormatter
 fun DetailedPetScreen(
     homeViewModel: HomeViewModel?,
     paddingValues: PaddingValues,
-    petDocumentId: String
+    petDocumentId: String,
+    onChatClick: (String) -> Unit,
 ) {
 
     homeViewModel?.fetchPetById(petDocumentId)
@@ -138,7 +139,7 @@ fun DetailedPetScreen(
 
                         is Resource.Success -> {
                             val pet = (petResource as Resource.Success<Pet>).result
-                            PetCard(homeViewModel, pet)
+                            PetCard(homeViewModel, pet, onChatClick)
                         }
 
                         null -> TODO()
@@ -154,8 +155,9 @@ fun DetailedPetScreen(
 }
 
 @Composable
-fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
+fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> Unit) {
 
+    val petId = pet?.id.toString()
     val imageStrings = pet?.photos
     val pagerState = rememberPagerState(
         pageCount = { imageStrings?.size ?: 0 }
@@ -163,6 +165,14 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
 
     homeViewModel?.fetchUserById(pet!!.userId)
     val user = homeViewModel?.userById?.collectAsState()
+
+    val isLiked = homeViewModel?.isLiked?.collectAsState()
+    val likeStatus = homeViewModel?.likeStatus?.collectAsState()
+
+    LaunchedEffect(petId) {
+        // Check if the pet is already liked when the screen is loaded
+        homeViewModel?.checkIfLiked(petId)
+    }
 
     Column(
         modifier = Modifier
@@ -203,7 +213,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = user?.value?.name ?: "Owner name",
+                    text = user?.value?.username ?: "Owner name",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal
                 )
@@ -396,7 +406,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Button(
-                onClick = {  },
+                onClick = { },
                 Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
@@ -409,18 +419,54 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
                 }
             }
             Button(
-                onClick = {  },
+                onClick = {
+                    if (pet?.id != null) {
+                        homeViewModel?.toggleLike(pet.id)
+                    } else {
+                        Log.i("MYTAG", "Add to like: $pet")
+                    }
+                },
                 Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Box {
-                    Text(
-                        text = "Add to liked",
-                        Modifier.padding(8.dp)
-                    )
+                Box(
+//                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    when (likeStatus?.value) {
+                        is Resource.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.padding(8.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+
+                        is Resource.Failure -> {
+                            Text(text = "An error occurred: ${(likeStatus.value as Resource.Failure).exception}")
+                        }
+
+                        else -> {
+                            Text(
+                                text = if (isLiked?.value == true) "Remove like" else "Add to likes",
+                                Modifier.padding(8.dp)
+                            )
+                        }
+                    }
                 }
             }
+//            Button(
+//                onClick = { },
+//                Modifier.weight(1f),
+//                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+//                shape = RoundedCornerShape(10.dp)
+//            ) {
+//                Box {
+//                    Text(
+//                        text = "Add to liked",
+//                        Modifier.padding(8.dp)
+//                    )
+//                }
+//            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -434,7 +480,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?) {
 fun DetailedPetScreenPreviewLight() {
     PetPalTheme {
         PetPalTheme {
-            PetCard(null, null)
+            PetCard(null, null) {  }
         }
     }
 }
@@ -443,6 +489,6 @@ fun DetailedPetScreenPreviewLight() {
 @Composable
 fun DetailedPetScreenPreviewDark() {
     PetPalTheme {
-        PetCard(null, null)
+        PetCard(null, null) {  }
     }
 }

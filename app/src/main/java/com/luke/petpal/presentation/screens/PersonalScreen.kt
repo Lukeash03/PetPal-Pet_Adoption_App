@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,10 +25,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewModelScope
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -60,7 +74,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalScreen(
-    homeViewModel: HomeViewModel?
+    homeViewModel: HomeViewModel?,
+    paddingValues: PaddingValues,
+//    onAdoptionPetClick: () -> Unit
 ) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -75,14 +91,19 @@ fun PersonalScreen(
         homeViewModel?.fetchProfileImageUrl()
     }
 
-    val profileImageUrl by homeViewModel?.profileImageUrl?.collectAsState() ?: remember { mutableStateOf(Resource.Loading) }
+    val userId = homeViewModel?.currentUser?.uid.toString()
+    homeViewModel?.fetchUserById(userId)
+    val user = homeViewModel?.userById?.collectAsState()
+    val profileImageUrl by homeViewModel?.profileImageUrl?.collectAsState()
+        ?: remember { mutableStateOf(Resource.Loading) }
 
     Column(
         modifier = Modifier
+            .padding(top = paddingValues.calculateTopPadding())
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background),
-        verticalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -109,71 +130,159 @@ fun PersonalScreen(
             }
         }
 
-        Box(
-            contentAlignment = Alignment.Center,
+        Column(
             modifier = Modifier
-                .size(200.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(5.dp, appColorPrimary, CircleShape)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            when (profileImageUrl) {
-                is Resource.Loading -> {
-                    // Show a loading indicator if needed
-                }
-                is Resource.Success -> {
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current).data(data = (profileImageUrl as Resource.Success<String>).result)
-                                .apply {
-                                    transformations(CircleCropTransformation())
-                                }
-                                .build()
-                        ),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(200.dp - (4f * 2).dp)
-                            .clickable {
-                                imagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            }
-                    )
-                }
-                is Resource.Failure -> {
-                    imageUri?.let { uri ->
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                ImageRequest.Builder(LocalContext.current).data(data = uri)
-                                    .apply(block = fun ImageRequest.Builder.() {
-                                        transformations(CircleCropTransformation())
-                                    }).build()
-                            ),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(15.dp),
+                elevation = CardDefaults.cardElevation(10.dp),
+                colors = CardDefaults.cardColors()
+            ) {
+                Column(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(200.dp - (4f * 2).dp)
-                                .clickable {
-                                    imagePickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                .padding(top = 12.dp, bottom = 12.dp, start = 12.dp)
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .border(1.dp, appColorPrimary, CircleShape)
+                        ) {
+                            when (profileImageUrl) {
+                                is Resource.Loading -> {
+                                    // Show a loading indicator if needed
+                                }
+
+                                is Resource.Success -> {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            ImageRequest.Builder(LocalContext.current)
+                                                .data(data = (profileImageUrl as Resource.Success<String>).result)
+                                                .apply {
+                                                    transformations(CircleCropTransformation())
+                                                }
+                                                .build()
+                                        ),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(100.dp - (1f * 2).dp)
+                                            .clickable {
+                                                imagePickerLauncher.launch(
+                                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                                )
+                                            }
                                     )
                                 }
-                        )
-                    } ?: Image(
-                        painter = painterResource(id = R.drawable.bx_camera),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(150.dp - (4f * 2).dp)
-                            .clickable {
-                                imagePickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
+
+                                is Resource.Failure -> {
+                                    imageUri?.let { uri ->
+                                        Image(
+                                            painter = rememberAsyncImagePainter(
+                                                ImageRequest.Builder(LocalContext.current)
+                                                    .data(data = uri)
+                                                    .apply(block = fun ImageRequest.Builder.() {
+                                                        transformations(CircleCropTransformation())
+                                                    }).build()
+                                            ),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(200.dp - (4f * 2).dp)
+                                                .clickable {
+                                                    imagePickerLauncher.launch(
+                                                        PickVisualMediaRequest(
+                                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                                        )
+                                                    )
+                                                }
+                                        )
+                                    } ?: Image(
+                                        painter = painterResource(id = R.drawable.bx_camera),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(150.dp - (4f * 2).dp)
+                                            .clickable {
+                                                imagePickerLauncher.launch(
+                                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                                )
+                                            }
+                                    )
+                                }
                             }
-                    )
+                        }
+
+                        Column {
+
+                            TextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                value = user?.value?.username.toString(),
+                                enabled = false,
+                                singleLine = true,
+                                onValueChange = { },
+//                                leadingIcon = {
+//                                    androidx.compose.material3.Icon(
+//                                        imageVector = Icons.Default.Person,
+//                                        contentDescription = "Email"
+//                                    )
+//                                },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = TextFieldDefaults.colors(
+                                    disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                                    disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                                    disabledIndicatorColor = Color.Transparent
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                value = user?.value?.email.toString(),
+                                enabled = false,
+                                singleLine = true,
+                                onValueChange = { },
+//                                leadingIcon = {
+//                                    androidx.compose.material3.Icon(
+//                                        imageVector = Icons.Default.Email,
+//                                        contentDescription = "Email"
+//                                    )
+//                                },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = TextFieldDefaults.colors(
+                                    disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                                    disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                                    disabledIndicatorColor = Color.Transparent
+                                )
+                            )
+                        }
+                    }
+
                 }
+
             }
+
         }
 
         Box(
@@ -184,6 +293,8 @@ fun PersonalScreen(
             ) {
 
                 Button(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.5f),
                     onClick = {
                         imageUri?.let { uri ->
                             homeViewModel?.viewModelScope?.launch {
@@ -217,26 +328,113 @@ fun PersonalScreen(
                                 }
                             }
                         }
-//                    viewModel?.signUp(username, email, password)
                     },
-                    Modifier
-                        .fillMaxWidth(fraction = 0.5f),
                     colors = ButtonDefaults.buttonColors(appColorPrimary),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Box {
                         Text(
-                            text = "Continue",
+                            text = "Update",
                             Modifier.padding(8.dp),
                             color = MaterialTheme.colorScheme.background
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+//                Spacer(modifier = Modifier.height(16.dp))
 
             }
         }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(15.dp),
+                elevation = CardDefaults.cardElevation(10.dp),
+                colors = CardDefaults.cardColors()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(vertical = 24.dp)
+                        .clickable {
+
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        value = "My Adoption Pets",
+                        enabled = false,
+                        onValueChange = { },
+                        leadingIcon = {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.Pets,
+                                contentDescription = "Email"
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = ""
+                            )
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = TextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface,
+                            disabledIndicatorColor = Color.Transparent,
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        value = "My Pets",
+                        enabled = false,
+                        onValueChange = { },
+                        leadingIcon = {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Outlined.Pets,
+                                contentDescription = "Email"
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                contentDescription = ""
+                            )
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = TextFieldDefaults.colors(
+                            disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+                            disabledContainerColor = MaterialTheme.colorScheme.surface,
+                            disabledIndicatorColor = Color.Transparent,
+                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
+                }
+
+            }
+
+        }
+
+
+//        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -244,7 +442,8 @@ fun PersonalScreen(
 @Composable
 fun PersonalScreenPreviewLight() {
     PetPalTheme {
-        PersonalScreen(null)
+//        Profile()
+        PersonalScreen(null, PaddingValues())
     }
 }
 
@@ -252,6 +451,28 @@ fun PersonalScreenPreviewLight() {
 @Composable
 fun PersonalScreenPreviewDark() {
     PetPalTheme {
-        PersonalScreen(null)
+//        Profile()
+        PersonalScreen(null, PaddingValues())
+    }
+}
+
+@Composable
+fun Profile() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ConstraintLayout(
+            Modifier
+                .height(250.dp)
+                .background(MaterialTheme.colorScheme.primary)
+        ) {
+
+            val (topImg, profile, title, back, pen) = createRefs()
+
+//            Image(painter = painterResource(id = R.drawable.arc), contentDescription = )
+        }
     }
 }

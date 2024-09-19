@@ -10,6 +10,8 @@ interface HomeRepository {
     val currentUser: FirebaseUser?
     suspend fun uploadPet(pet: Pet): Resource<Unit>
     suspend fun fetchPetList(species: String? = null): Resource<List<Pet>>
+    suspend fun fetchUserPetList(species: String? = null): Resource<List<Pet>>
+    suspend fun fetchLikedPetList(): Resource<List<Pet>>
     suspend fun fetchPetById(petId: String): Resource<Pet>
     suspend fun fetchUserById(userId: String): Resource<User>
     suspend fun isPetLiked(petId: String): Boolean
