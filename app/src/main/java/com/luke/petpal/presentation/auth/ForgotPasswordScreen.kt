@@ -44,11 +44,11 @@ import com.luke.petpal.presentation.theme.appColorPrimary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(
-    viewModel: AuthViewModel?,
+    authViewModel: AuthViewModel?,
     navController: NavController
 ) {
     val context = LocalContext.current
-    val passwordResetFlow = viewModel?.passwordResetFlow?.collectAsState()
+    val passwordResetFlow = authViewModel?.passwordResetFlow?.collectAsState()
 
     var email by remember { mutableStateOf("") }
 
@@ -87,7 +87,7 @@ fun ForgotPasswordScreen(
 
         Button(
             onClick = {
-                viewModel?.sendPasswordResetEmail(email)
+                authViewModel?.sendPasswordResetEmail(email)
             },
             Modifier
                 .fillMaxWidth(fraction = 0.4f)
@@ -112,7 +112,7 @@ fun ForgotPasswordScreen(
                     Toast.makeText(context, "Password reset email sent", Toast.LENGTH_SHORT).show()
                     // Navigate back to login screen
                     LaunchedEffect(Unit) {
-                        viewModel.resetPasswordResetFlow()
+                        authViewModel.resetPasswordResetFlow()
                         navController.navigate(AuthScreen.Login.route) {
                             popUpTo(AuthScreen.Login.route) { inclusive = true }
                         }

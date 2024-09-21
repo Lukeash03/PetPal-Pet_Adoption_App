@@ -118,7 +118,13 @@ dependencies {
     implementation(libs.datetime)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    implementation("com.google.android.gms:play-services-base:17.6.0")
+    // Location services
+    implementation(libs.play.services.base)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+
+    // Maps Compose
+    implementation(libs.maps.compose)
 
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
 

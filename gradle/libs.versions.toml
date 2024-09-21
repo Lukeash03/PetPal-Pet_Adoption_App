@@ -20,10 +20,14 @@ lifecycleRuntimeCompose = "2.8.3"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.0"
 composeBom = "2024.06.00"
+mapsCompose = "6.1.2"
 material3 = "1.2.1"
 material = "1.6.8"
 materialIconsExtended = "1.6.8"
 navigationCompose = "2.7.7"
+playServicesBase = "17.6.0"
+playServicesLocation = "21.3.0"
+playServicesMaps = "19.0.0"
 serialization = "1.6.3"
 playServicesAuth = "21.2.0"
 places = "3.5.0"
@@ -71,12 +75,16 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 material = { module = "androidx.compose.material:material", version.ref = "material" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout-core = { group = "androidx.constraintlayout", name = "constraintlayout-core", version.ref = "constraintlayoutCore" }
+play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

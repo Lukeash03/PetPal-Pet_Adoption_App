@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import com.luke.petpal.presentation.HomeViewModel
+import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.screens.HomeScreen
 import com.luke.petpal.presentation.auth.AuthViewModel
 
@@ -23,6 +24,7 @@ fun RootNavGraph(
 
     val authViewModel: AuthViewModel = hiltViewModel()
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val userProfileViewModel: UserProfileViewModel = hiltViewModel()
 
     val rootNavGraph: NavGraph = navController.createGraph(
         startDestination = Graph.AUTHENTICATION,
@@ -30,7 +32,8 @@ fun RootNavGraph(
     ) {
         AuthNavGraph(
             navController = navController,
-            viewModel = authViewModel,
+            authViewModel = authViewModel,
+            userProfileViewModel = userProfileViewModel,
             splashScreenCompleted = splashScreenCompleted
         )
         composable(route = Graph.HOME) {

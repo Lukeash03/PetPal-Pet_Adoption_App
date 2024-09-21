@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.auth.AuthViewModel
 import com.luke.petpal.presentation.auth.ForgotPasswordScreen
 import com.luke.petpal.presentation.auth.LoginScreen
@@ -13,25 +14,30 @@ import com.luke.petpal.presentation.auth.SignUpScreen
 
 @Composable
 fun NavGraphBuilder.AuthNavGraph(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
+    userProfileViewModel: UserProfileViewModel,
     navController: NavController,
     splashScreenCompleted: Boolean
 ) {
+
     navigation(
         route = Graph.AUTHENTICATION,
         startDestination = AuthScreen.Login.route
     ) {
         composable(route = AuthScreen.Login.route) {
-            LoginScreen(viewModel, navController = navController, splashScreenCompleted)
+            LoginScreen(authViewModel, navController = navController, splashScreenCompleted)
         }
         composable(route = AuthScreen.SignUp.route) {
-            SignUpScreen(viewModel, navController = navController)
+            SignUpScreen(authViewModel, navController = navController)
         }
         composable(route = AuthScreen.Forgot.route) {
-            ForgotPasswordScreen(viewModel = viewModel, navController = navController)
+            ForgotPasswordScreen(authViewModel = authViewModel, navController = navController)
         }
         composable(route = AuthScreen.SignUpDetailed.route) {
-            SignUpDetailScreen(viewModel = viewModel, navController = navController)
+            SignUpDetailScreen(
+                userProfileViewModel = userProfileViewModel,
+                navController = navController
+            )
         }
     }
 }

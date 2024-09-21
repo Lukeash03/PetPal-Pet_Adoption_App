@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.HomeRepository
-import com.luke.petpal.data.repository.ProfileImageRepository
+import com.luke.petpal.data.repository.UserProfileRepository
 import com.luke.petpal.domain.data.Pet
 import com.luke.petpal.domain.data.User
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeRepository: HomeRepository,
-    private val profileImageRepository: ProfileImageRepository,
+    private val userProfileRepository: UserProfileRepository,
     private val googleAuthUIClient: GoogleAuthUIClient,
 ) : ViewModel() {
 
@@ -78,20 +78,20 @@ class HomeViewModel @Inject constructor(
     }
 
     fun uploadProfileImage(uri: Uri) = viewModelScope.launch {
-        val result = profileImageRepository.uploadProfileImage(uri)
+        val result = userProfileRepository.uploadProfileImage(uri)
         _uploadImageResult.value = result
         Log.i("MyTag", "uploadProfileImage: ViewModel: ${_uploadImageResult.value}")
     }
 
     fun updateProfileImageUrl(url: String) = viewModelScope.launch {
-        val result = profileImageRepository.updateProfileImageUrl(url)
+        val result = userProfileRepository.updateProfileImageUrl(url)
         _updateProfileImageResult.value = result
         Log.i("MyTag", "updateProfileImageUrl: ViewModel: ${_updateProfileImageResult.value}")
     }
 
     fun fetchProfileImageUrl() {
         viewModelScope.launch {
-            val result = profileImageRepository.fetchProfileUrl()
+            val result = userProfileRepository.fetchProfileUrl()
             _profileImageUrl.value = result
         }
     }

@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,17 +42,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -61,13 +63,16 @@ import coil.transform.CircleCropTransformation
 import com.luke.petpal.R
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.navigation.Graph
+import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
-import com.luke.petpal.presentation.theme.appColorSecondary
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) {
+fun SignUpDetailScreen(
+    userProfileViewModel: UserProfileViewModel?,
+    navController: NavController
+) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -76,15 +81,15 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
     )
 
     LaunchedEffect(Unit) {
-        viewModel?.fetchProfileImageUrl()
+        userProfileViewModel?.fetchProfileImageUrl()
     }
 
     val context = LocalContext.current
-    val uploadImageResult = viewModel?.uploadImageResult?.collectAsState()
-    val updateProfileImageResult = viewModel?.updateProfileImageResult?.collectAsState()
+//    val uploadImageResult = authViewModel?.uploadImageResult?.collectAsState()
+//    val updateProfileImageResult = authViewModel?.updateProfileImageResult?.collectAsState()
 
-    var location by remember { mutableStateOf(TextFieldValue()) }
-    var selectedLocation by remember { mutableStateOf<String?>(null) }
+    val locationState = userProfileViewModel?.locationFlow?.collectAsState()
+    val uploadState = userProfileViewModel?.uploadState?.collectAsState()
 
     Column(
         modifier = Modifier
@@ -186,38 +191,60 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            PlacesAutocomplete(
-//                modifier = Modifier.padding(top = 16.dp),
-//                onPlaceSelected = { place: Place ->
-//                    viewModel?.updateLocation(place)
-//                },
-//                onError = { status: Status ->
-//
-//                })
-            OutlinedTextField(
-                value = location,
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.placeholder),
-                        contentDescription = "Choose on map",
-                        modifier = Modifier
-                            .size(24.dp),
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                },
-                shape = RoundedCornerShape(10.dp),
-                onValueChange = { location = it },
-                label = {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        userProfileViewModel?.getLocation(context)
+
+//                        { location ->
+//                            if (location != null) {
+//                                val latLng = "${location.latitude}, ${location.longitude}"
+//                                selectedLocation = latLng
+//                            }
+//                        }
+                    }) {
                     Text(
-                        text = "Enter Location",
+                        text = "Use current location",
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        userProfileViewModel?.getLocation(context)
+                    }) {
+                    Text(
+                        text = "Choose from Maps",
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+
+            Text(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .border(border = BorderStroke(1.dp, Color.Black), RoundedCornerShape(10.dp)),
+                text = if (locationState?.value == null) {
+                    "Location coordinates"
+                } else {
+                    "${locationState.value!!.latitude}, ${locationState.value!!.longitude}"
                 },
-                modifier = Modifier.fillMaxWidth()
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp,
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -225,7 +252,6 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
         }
 
         Box(
-//            modifier = Modifier.weight(0.5f),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -234,37 +260,9 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
 
                 Button(
                     onClick = {
-                        imageUri?.let { uri ->
-                            viewModel?.viewModelScope?.launch {
-                                viewModel.uploadProfileImage(uri)
-                                viewModel.uploadImageResult.collect { uploadResult ->
-                                    if (uploadResult is Resource.Success) {
-                                        val imageUrl = uploadResult.result
-                                        viewModel.updateProfileImageUrl(imageUrl)
-                                        viewModel.updateProfileImageResult.collect { updateResult ->
-                                            if (updateResult is Resource.Success) {
-                                                navController.navigate(Graph.HOME) {
-                                                    popUpTo(Graph.HOME)
-                                                }
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Failed to update profile image URL",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to upload image",
-                                            Toast.LENGTH_LONG
-                                        )
-                                    }
-                                }
-                            }
-                        }
-//                    viewModel?.signUp(username, email, password)
+                        val location = locationState?.value
+                        userProfileViewModel?.uploadProfileImageAndLocation(imageUri, location)
+
                     },
                     Modifier
                         .fillMaxWidth(fraction = 0.5f),
@@ -272,19 +270,43 @@ fun SignUpDetailScreen(viewModel: AuthViewModel?, navController: NavController) 
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Box {
-                        Text(
-                            text = "Continue",
-                            Modifier.padding(8.dp),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                        uploadState?.value?.let {
+                            when (it) {
+                                is Resource.Success -> {
+                                    LaunchedEffect(Unit) {
+                                        navController.navigate(Graph.HOME) {
+                                            popUpTo(Graph.HOME)
+                                        }
+                                    }
+                                }
+
+                                is Resource.Failure -> {
+                                    Toast.makeText(
+                                        context,
+                                        it.exception.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+
+                                Resource.Loading -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
+
+                        if (uploadState?.value !is Resource.Loading) {
+                            Text(
+                                text = "Continue",
+                                Modifier.padding(8.dp),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                selectedLocation?.let {
-                    Text("Selected Location: $it", style = MaterialTheme.typography.bodyLarge)
-                }
 
                 Text(
                     text = "I'll do this later",

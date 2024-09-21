@@ -12,7 +12,7 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.firebase.auth.FirebaseUser
 import com.luke.petpal.data.repository.AuthRepository
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.data.repository.ProfileImageRepository
+import com.luke.petpal.data.repository.UserProfileRepository
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
 import com.luke.petpal.domain.repository.usecase.ValidateUsername
@@ -34,7 +34,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val profileImageRepository: ProfileImageRepository,
     private val googleAuthUIClient: GoogleAuthUIClient,
     private val validateUsername: ValidateUsername = ValidateUsername(),
     private val validateEmail: ValidateEmail = ValidateEmail(),
@@ -52,18 +51,6 @@ class AuthViewModel @Inject constructor(
 
     private val _googleSignInFlow = MutableStateFlow(SignInState())
     val googleSignInFlow = _googleSignInFlow.asStateFlow()
-
-    private val _uploadImageResult = MutableStateFlow<Resource<String>?>(null)
-    val uploadImageResult: StateFlow<Resource<String>?> = _uploadImageResult
-
-    private val _updateProfileImageResult = MutableStateFlow<Resource<Unit>?>(null)
-    val updateProfileImageResult: StateFlow<Resource<Unit>?> = _updateProfileImageResult
-
-    private val _profileImageUrl = MutableStateFlow<Resource<String>>(Resource.Loading)
-    val profileImageUrl: StateFlow<Resource<String>> get() = _profileImageUrl
-
-    private val _location = MutableStateFlow<Place?>(null)
-    val location: StateFlow<Place?> = _location
 
     var state by mutableStateOf(RegistrationFormState())
 
@@ -176,29 +163,6 @@ class AuthViewModel @Inject constructor(
     fun signInWithGoogle(intent: Intent) = viewModelScope.launch {
         val result = googleAuthUIClient.signInWithIntent(intent)
         onSignInResult(result)
-    }
-
-    fun uploadProfileImage(uri: Uri) = viewModelScope.launch {
-        val result = profileImageRepository.uploadProfileImage(uri)
-        _uploadImageResult.value = result
-        Log.i("MyTag", "uploadProfileImage: ViewModel: ${_uploadImageResult.value}")
-    }
-
-    fun updateProfileImageUrl(url: String) = viewModelScope.launch {
-        val result = profileImageRepository.updateProfileImageUrl(url)
-        _updateProfileImageResult.value = result
-        Log.i("MyTag", "updateProfileImageUrl: ViewModel: ${_updateProfileImageResult.value}")
-    }
-
-    fun fetchProfileImageUrl() {
-        viewModelScope.launch {
-            val result = profileImageRepository.fetchProfileUrl()
-            _profileImageUrl.value = result
-        }
-    }
-
-    fun updateLocation(place: Place) {
-        _location.value = place
     }
 
     sealed class ValidationEvent {
