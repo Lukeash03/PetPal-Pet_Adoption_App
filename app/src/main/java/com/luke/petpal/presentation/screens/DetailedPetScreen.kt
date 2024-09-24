@@ -58,26 +58,21 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.domain.data.Pet
-import com.luke.petpal.navigation.Graph
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun DetailedPetScreen(
     homeViewModel: HomeViewModel?,
     paddingValues: PaddingValues,
-    petDocumentId: String,
+    petId: String,
     onChatClick: (String) -> Unit,
 ) {
 
-    homeViewModel?.fetchPetById(petDocumentId)
+    homeViewModel?.fetchPetById(petId)
     val petResource by homeViewModel!!.petById.collectAsState()
-
-//    petResource?.value?.userId?.let { homeViewModel.fetchUserById(it) }
-//    val user = homeViewModel?.userById?.collectAsState()
 
     val context = LocalContext.current
     Box(
@@ -157,13 +152,20 @@ fun DetailedPetScreen(
 @Composable
 fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> Unit) {
 
-    val petId = pet?.id.toString()
+    val petId = pet?.petId.toString()
+
     val imageStrings = pet?.photos
     val pagerState = rememberPagerState(
         pageCount = { imageStrings?.size ?: 0 }
     )
 
-    homeViewModel?.fetchUserById(pet!!.userId)
+    LaunchedEffect(pet?.userId) {
+        pet?.userId?.let { userId ->
+            homeViewModel?.fetchUserById(userId)
+        }
+    }
+
+//    homeViewModel?.fetchUserById(pet!!.userId)
     val user = homeViewModel?.userById?.collectAsState()
 
     val isLiked = homeViewModel?.isLiked?.collectAsState()
@@ -420,8 +422,8 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
             }
             Button(
                 onClick = {
-                    if (pet?.id != null) {
-                        homeViewModel?.toggleLike(pet.id)
+                    if (pet?.petId != null) {
+                        homeViewModel?.toggleLike(pet.petId)
                     } else {
                         Log.i("MYTAG", "Add to like: $pet")
                     }

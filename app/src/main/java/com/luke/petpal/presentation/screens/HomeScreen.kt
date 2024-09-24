@@ -159,7 +159,7 @@ fun HomeScreen(
         HomeNavGraph(
             navController = navController,
             paddingValues = it,
-            homeViewModel = homeViewModel
+            homeViewModel = homeViewModel,
         )
     }
 

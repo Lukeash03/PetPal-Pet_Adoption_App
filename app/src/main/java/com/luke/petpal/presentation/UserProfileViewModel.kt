@@ -7,8 +7,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.firebase.auth.FirebaseUser
 import com.luke.petpal.data.models.Resource
+import com.luke.petpal.data.repository.HomeRepository
 import com.luke.petpal.data.repository.UserProfileRepository
+import com.luke.petpal.domain.data.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,15 +21,15 @@ import javax.inject.Inject
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val userProfileRepository: UserProfileRepository,
+    private val homeRepository: HomeRepository
 ) : ViewModel() {
+
+    val currentUser: FirebaseUser? get() = userProfileRepository.currentUser
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val _uploadImageResult = MutableStateFlow<Resource<String>?>(null)
-    val uploadImageResult: StateFlow<Resource<String>?> = _uploadImageResult
-
-    private val _updateProfileImageResult = MutableStateFlow<Resource<Unit>?>(null)
-    val updateProfileImageResult: StateFlow<Resource<Unit>?> = _updateProfileImageResult
+    private val _userById = MutableStateFlow<User?>(null)
+    val userById: StateFlow<User?> = _userById
 
     private val _profileImageUrl = MutableStateFlow<Resource<String>>(Resource.Loading)
     val profileImageUrl: StateFlow<Resource<String>> get() = _profileImageUrl
@@ -34,22 +37,16 @@ class UserProfileViewModel @Inject constructor(
     private val _locationFlow = MutableStateFlow<Location?>(null)
     val locationFlow: StateFlow<Location?> = _locationFlow
 
-    private val _updateLocationResult = MutableStateFlow<Resource<Unit>?>(null)
-    val updateLocationResult: StateFlow<Resource<Unit>?> = _updateLocationResult
-
     private val _uploadState = MutableStateFlow<Resource<Unit>?>(null)
     val uploadState: StateFlow<Resource<Unit>?> = _uploadState
 
-    fun uploadProfileImage(uri: Uri) = viewModelScope.launch {
-        val result = userProfileRepository.uploadProfileImage(uri)
-        _uploadImageResult.value = result
-        Log.i("MyTag", "uploadProfileImage: ViewModel: ${_uploadImageResult.value}")
-    }
-
-    fun updateProfileImageUrl(url: String) = viewModelScope.launch {
-        val result = userProfileRepository.updateProfileImageUrl(url)
-        _updateProfileImageResult.value = result
-        Log.i("MyTag", "updateProfileImageUrl: ViewModel: ${_updateProfileImageResult.value}")
+    fun fetchUserById(userId: String?) {
+        viewModelScope.launch {
+            val result = userId?.let { homeRepository.fetchUserById(it) }
+            if (result is Resource.Success) {
+                _userById.value = result.result
+            }
+        }
     }
 
     fun fetchProfileImageUrl() {
@@ -64,12 +61,6 @@ class UserProfileViewModel @Inject constructor(
             userProfileRepository.fetchCurrentLocation(context) { location ->
                 _locationFlow.value = location
             }
-        }
-    }
-
-    fun updateLocation(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            _updateLocationResult.value = userProfileRepository.updateLocation(latitude, longitude)
         }
     }
 

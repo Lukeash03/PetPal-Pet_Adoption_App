@@ -25,12 +25,10 @@ class HomeRepositoryImpl @Inject constructor(
         get() = firebaseAuth.currentUser
 
     override suspend fun uploadPet(pet: Pet): Resource<Unit> {
-        val uniquePetId = UUID.randomUUID().toString()
-
         val photoUri = pet.photos?.map { Uri.parse(it) }
         val photoUrls = photoUri?.mapNotNull { uri ->
             val filename = uri.lastPathSegment ?: return@mapNotNull null
-            val storageRef = storage.reference.child("pets/$uniquePetId/$filename")
+            val storageRef = storage.reference.child("pets/${UUID.randomUUID()}/$filename")
             storageRef.putFile(uri).await()
             storageRef.downloadUrl.await().toString()
         } ?: emptyList()
@@ -39,7 +37,6 @@ class HomeRepositoryImpl @Inject constructor(
         val weight = pet.weight?.toString()?.toIntOrNull()
 
         val petData = mapOf(
-            "petId" to uniquePetId,
             "userId" to currentUser?.uid,
             "name" to pet.name,
             "species" to pet.species,
@@ -58,7 +55,49 @@ class HomeRepositoryImpl @Inject constructor(
             val documentRef = firestore.collection("pets")
                 .add(petData)
                 .await()
-            documentRef.update("id", documentRef.id)
+            documentRef.update("petId", documentRef.id)
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+    }
+
+    override suspend fun updatePet(pet: Pet): Resource<Unit> {
+        val newPhotoUris = pet.photos?.filter { it.startsWith("content://") }?.map { Uri.parse(it) }
+
+        val newPhotoUrls = newPhotoUris?.mapNotNull { uri ->
+            val filename = uri.lastPathSegment ?: return@mapNotNull null
+            val storageRef = storage.reference.child("pets/${pet.petId}/$filename") // Use existing petId
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        } ?: emptyList()
+
+        val existingPhotoUrls = pet.photos?.filter { it.startsWith("https://") } ?: emptyList()
+        val finalPhotosUrls = existingPhotoUrls + newPhotoUrls
+
+        val dob = pet.dob?.toString()?.toLongOrNull()
+        val weight = pet.weight?.toString()?.toIntOrNull()
+
+        val updatedPetData = mapOf(
+            "name" to pet.name,
+            "species" to pet.species,
+            "breed" to pet.breed,
+            "gender" to pet.gender,
+            "dob" to dob,
+            "weight" to weight,
+            "color" to pet.color,
+            "description" to pet.description,
+            "vaccineStatus" to pet.vaccinationStatus,
+            "publishDate" to pet.publishDate,
+            "photos" to finalPhotosUrls
+        )
+
+        Log.i("HomeRepositoryImpl", "Pet: $pet")
+        return try {
+            firestore.collection("pets").document(pet.petId.toString())
+                .update(updatedPetData)
+                .await()
             Resource.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -81,21 +120,21 @@ class HomeRepositoryImpl @Inject constructor(
                     val pet = document.toObject(Pet::class.java)
                     pet?.copy(
                         photos = pet.photos?.map { it } ?: emptyList(),
-                        id = document.id
+//                        petId = document.id
                     )
                 }
 
-            Log.i("MYTAG", "fetchPetList: $petList ")
+            Log.i("HomeRepositoryImpl", "fetchPetList: $petList ")
             Resource.Success(petList)
         } catch (e: Exception) {
-            Log.i("MYTAG", "fetchPetList: $e")
+            Log.i("HomeRepositoryImpl", "fetchPetList: $e")
             Resource.Failure(e)
         }
     }
 
     override suspend fun fetchUserPetList(species: String?): Resource<List<Pet>> {
         return try {
-            Log.i("MYTAG", "fetchUserPetList-> ${currentUser?.uid.toString()}")
+            Log.i("HomeRepositoryImpl", "fetchUserPetList-> ${currentUser?.uid.toString()}")
             val query = if (species != null) {
                 firestore.collection("pets")
                     .whereEqualTo("userId", currentUser?.uid.toString())
@@ -112,14 +151,14 @@ class HomeRepositoryImpl @Inject constructor(
                     val pet = document.toObject(Pet::class.java)
                     pet?.copy(
                         photos = pet.photos?.map { it } ?: emptyList(),
-                        id = document.id
+                        petId = document.id
                     )
                 }
 
-            Log.i("MYTAG", "fetchUserPetList: $petList ")
+            Log.i("HomeRepositoryImpl", "fetchUserPetList: $petList ")
             Resource.Success(petList)
         } catch (e: Exception) {
-            Log.i("MYTAG", "fetchUserPetList: $e")
+            Log.i("HomeRepositoryImpl", "fetchUserPetList: $e")
             Resource.Failure(e)
         }
     }
@@ -140,12 +179,12 @@ class HomeRepositoryImpl @Inject constructor(
                     .document(petId)
                     .get()
                     .await()
-                petDocument.toObject(Pet::class.java)?.copy(id = petId)
+                petDocument.toObject(Pet::class.java)?.copy(petId = petId)
             }
-            Log.i("MYTAG", "fetchLikedPetList petList: $petList ")
+            Log.i("HomeRepositoryImpl", "fetchLikedPetList petList: $petList ")
             Resource.Success(petList)
         } catch (e: Exception) {
-            Log.i("MYTAG", "fetchLikedPets: $e")
+            Log.i("HomeRepositoryImpl", "fetchLikedPets: $e")
             Resource.Failure(e)
         }
     }
@@ -169,7 +208,7 @@ class HomeRepositoryImpl @Inject constructor(
                 firestore.collection("users").document(userId).get().await()
             val user = documentSnapshot.toObject(User::class.java)
 
-            Log.i("MYTAG", "Before success: $user")
+            Log.i("HomeRepositoryImpl", "Before success: $user")
             Resource.Success(user!!)
         } catch (e: Exception) {
             e.printStackTrace()

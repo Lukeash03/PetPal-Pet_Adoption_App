@@ -2,6 +2,7 @@ package com.luke.petpal.presentation.auth
 
 import android.content.res.Configuration
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -77,7 +78,10 @@ fun SignUpDetailScreen(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri: Uri? -> imageUri = uri }
+        onResult = { uri: Uri? ->
+            Log.i("SignUpDetailScreen", "Uri = $uri")
+            imageUri = uri
+        }
     )
 
     LaunchedEffect(Unit) {
@@ -262,7 +266,6 @@ fun SignUpDetailScreen(
                     onClick = {
                         val location = locationState?.value
                         userProfileViewModel?.uploadProfileImageAndLocation(imageUri, location)
-
                     },
                     Modifier
                         .fillMaxWidth(fraction = 0.5f),

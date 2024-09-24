@@ -1,7 +1,7 @@
 package com.luke.petpal.domain.data
 
 data class Pet(
-    val id: String? = null,
+    val petId: String? = null,
     val userId: String? = null,
     val name: String? = null,
     val species: String? = null,

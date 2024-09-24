@@ -39,6 +39,9 @@ class HomeViewModel @Inject constructor(
     private val _uploadStatus = MutableStateFlow<Resource<Unit>?>(null)
     val uploadStatus: StateFlow<Resource<Unit>?> = _uploadStatus
 
+    private val _updateStatus = MutableStateFlow<Resource<Unit>?>(null)
+    val updateStatus: StateFlow<Resource<Unit>?> = _updateStatus
+
     private val _petList = MutableStateFlow<List<Pet>?>(emptyList())
     val petList: StateFlow<List<Pet>?> = _petList
 
@@ -103,11 +106,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun updatePet(pet: Pet) {
+        viewModelScope.launch {
+            val petId = pet.petId
+            val result = homeRepository.updatePet(pet)
+            _updateStatus.value = result
+        }
+    }
     fun fetchPets() {
         viewModelScope.launch {
             val species = _selectedSpecies.value
             val result = homeRepository.fetchPetList(species)
-            Log.i("MYTAG", result.toString())
+            Log.i("HomeViewModel", "fetchPets: $result")
             if (result is Resource.Success) {
                 _petList.value = result.result
             } else {
@@ -150,7 +160,7 @@ class HomeViewModel @Inject constructor(
             try {
                 _petByIdFlow.value = Resource.Loading
                 val result = homeRepository.fetchPetById(petId)
-                Log.i("MYTAG", "FetchPetById: $result")
+                Log.i("HomeViewModel", "FetchPetById: $result")
                 _petByIdFlow.value = result
             } catch (e: Exception) {
                 _petByIdFlow.value = Resource.Failure(e)

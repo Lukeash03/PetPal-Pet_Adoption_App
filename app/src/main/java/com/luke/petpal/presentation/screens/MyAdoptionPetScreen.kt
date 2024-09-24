@@ -71,7 +71,6 @@ fun MyAdoptionPetScreen(
         onRefresh = ::refresh
     )
 
-//    val userId = homeViewModel?.currentUser?.uid.toString()
     val userPetList = homeViewModel?.userPetList?.collectAsState(emptyList())?.value ?: emptyList()
     val selectedSpecies = homeViewModel?.selectedSpecies?.collectAsState()
     Log.i("MYTAG", "Pet List: $userPetList")
@@ -193,7 +192,7 @@ fun MyAdoptionPetScreen(
             ) {
                 if (!refreshing) {
                     items(userPetList) { pet ->
-                        Log.i("MYTAG", "Inside MyPet lazy column: $pet")
+                        Log.i("MyAdoptionPetScreen", "Inside MyPet lazy column: $pet")
                         AdoptionPetCard(
                             pet = pet,
                             onSeeMoreClick = { documentId ->

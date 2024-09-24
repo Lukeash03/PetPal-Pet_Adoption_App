@@ -190,7 +190,8 @@ fun AdoptionScreen(
 
             Button(
                 shape = RoundedCornerShape(10.dp),
-                modifier = Modifier,
+                modifier = Modifier
+                    .padding(bottom = 12.dp),
                 onClick = { onMyPostClick() }
             ) {
                 Text(text = "My Posts")
@@ -201,7 +202,7 @@ fun AdoptionScreen(
             ) {
                 if (!refreshing) {
                     items(petList) { pet ->
-                        Log.i("MYTAG", "Inside lazy column: $pet")
+                        Log.i("AdoptionScreen", "Inside lazy column: $pet")
                         AdoptionPetCard(
                             pet = pet,
                             onSeeMoreClick = { documentId ->

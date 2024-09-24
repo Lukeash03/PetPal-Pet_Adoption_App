@@ -2,6 +2,7 @@ package com.luke.petpal.presentation.screens
 
 import android.content.res.Configuration
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -68,13 +69,14 @@ import coil.transform.CircleCropTransformation
 import com.luke.petpal.R
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.presentation.HomeViewModel
+import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalScreen(
-    homeViewModel: HomeViewModel?,
+    userProfileViewModel: UserProfileViewModel?,
     paddingValues: PaddingValues,
 //    onAdoptionPetClick: () -> Unit
 ) {
@@ -82,19 +84,22 @@ fun PersonalScreen(
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri: Uri? -> imageUri = uri }
+        onResult = { uri: Uri? ->
+            Log.i("PersonalScreen", "Uri = $uri")
+            imageUri = uri
+        }
     )
 
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        homeViewModel?.fetchProfileImageUrl()
+        userProfileViewModel?.fetchProfileImageUrl()
     }
 
-    val userId = homeViewModel?.currentUser?.uid.toString()
-    homeViewModel?.fetchUserById(userId)
-    val user = homeViewModel?.userById?.collectAsState()
-    val profileImageUrl by homeViewModel?.profileImageUrl?.collectAsState()
+    val userId = userProfileViewModel?.currentUser?.uid.toString()
+    userProfileViewModel?.fetchUserById(userId)
+    val user = userProfileViewModel?.userById?.collectAsState()
+    val profileImageUrl by userProfileViewModel?.profileImageUrl?.collectAsState()
         ?: remember { mutableStateOf(Resource.Loading) }
 
     Column(
@@ -239,12 +244,6 @@ fun PersonalScreen(
                                 enabled = false,
                                 singleLine = true,
                                 onValueChange = { },
-//                                leadingIcon = {
-//                                    androidx.compose.material3.Icon(
-//                                        imageVector = Icons.Default.Person,
-//                                        contentDescription = "Email"
-//                                    )
-//                                },
                                 shape = RoundedCornerShape(10.dp),
                                 colors = TextFieldDefaults.colors(
                                     disabledTextColor = MaterialTheme.colorScheme.onBackground,
@@ -262,12 +261,6 @@ fun PersonalScreen(
                                 enabled = false,
                                 singleLine = true,
                                 onValueChange = { },
-//                                leadingIcon = {
-//                                    androidx.compose.material3.Icon(
-//                                        imageVector = Icons.Default.Email,
-//                                        contentDescription = "Email"
-//                                    )
-//                                },
                                 shape = RoundedCornerShape(10.dp),
                                 colors = TextFieldDefaults.colors(
                                     disabledTextColor = MaterialTheme.colorScheme.onBackground,
@@ -296,38 +289,7 @@ fun PersonalScreen(
                     modifier = Modifier
                         .fillMaxWidth(fraction = 0.5f),
                     onClick = {
-                        imageUri?.let { uri ->
-                            homeViewModel?.viewModelScope?.launch {
-                                homeViewModel.uploadProfileImage(uri)
-                                homeViewModel.uploadImageResult.collect { uploadResult ->
-                                    if (uploadResult is Resource.Success) {
-                                        val imageUrl = uploadResult.result
-                                        homeViewModel.updateProfileImageUrl(imageUrl)
-                                        homeViewModel.updateProfileImageResult.collect { updateResult ->
-                                            if (updateResult is Resource.Success) {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Updated profile image URL",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                            } else {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Failed to update profile image URL",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to upload image",
-                                            Toast.LENGTH_LONG
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        userProfileViewModel?.uploadProfileImageAndLocation(imageUri, null)
                     },
                     colors = ButtonDefaults.buttonColors(appColorPrimary),
                     shape = RoundedCornerShape(10.dp)
@@ -340,8 +302,6 @@ fun PersonalScreen(
                         )
                     }
                 }
-
-//                Spacer(modifier = Modifier.height(16.dp))
 
             }
         }
@@ -432,9 +392,6 @@ fun PersonalScreen(
             }
 
         }
-
-
-//        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -442,7 +399,6 @@ fun PersonalScreen(
 @Composable
 fun PersonalScreenPreviewLight() {
     PetPalTheme {
-//        Profile()
         PersonalScreen(null, PaddingValues())
     }
 }
@@ -451,28 +407,6 @@ fun PersonalScreenPreviewLight() {
 @Composable
 fun PersonalScreenPreviewDark() {
     PetPalTheme {
-//        Profile()
         PersonalScreen(null, PaddingValues())
-    }
-}
-
-@Composable
-fun Profile() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ConstraintLayout(
-            Modifier
-                .height(250.dp)
-                .background(MaterialTheme.colorScheme.primary)
-        ) {
-
-            val (topImg, profile, title, back, pen) = createRefs()
-
-//            Image(painter = painterResource(id = R.drawable.arc), contentDescription = )
-        }
     }
 }
