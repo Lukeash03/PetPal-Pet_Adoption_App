@@ -5,13 +5,16 @@
 
 package com.luke.petpal.presentation.screens
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -152,6 +155,7 @@ fun DetailedPetScreen(
 @Composable
 fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> Unit) {
 
+    val context = LocalContext.current
     val petId = pet?.petId.toString()
 
     val imageStrings = pet?.photos
@@ -165,7 +169,6 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
         }
     }
 
-//    homeViewModel?.fetchUserById(pet!!.userId)
     val user = homeViewModel?.userById?.collectAsState()
 
     val isLiked = homeViewModel?.isLiked?.collectAsState()
@@ -393,10 +396,21 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
                     fontWeight = FontWeight.Normal,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+                val lat = user?.value?.location?.latitude
+                val lng = user?.value?.location?.longitude
                 Text(
-                    text = "Kochi",
+                    text = "Open in maps",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.clickable {
+                        Log.i("DetailedPetScreen", "Location: $lat, $lng")
+                        val locationUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng(Pet Location)")
+                        val mapIntent = Intent(Intent.ACTION_VIEW, locationUri)
+                        mapIntent.setPackage("com.google.android.apps.maps")
+                        if (mapIntent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(mapIntent)
+                        }
+                    }
                 )
             }
         }

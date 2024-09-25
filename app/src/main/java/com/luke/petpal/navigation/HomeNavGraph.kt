@@ -43,7 +43,7 @@ fun HomeNavGraph(
                     navController.navigate("pet_detailed/$documentId")
                 }
             )
-    }
+        }
         composable(route = "add_pet") {
             AddPetScreen(
                 homeViewModel = homeViewModel,
@@ -70,8 +70,8 @@ fun HomeNavGraph(
             MyAdoptionPetScreen(
                 homeViewModel = homeViewModel,
                 paddingValues = paddingValues,
-                onSeeMoreClick = { documentId ->
-                    navController.navigate("pet_edit/$documentId")
+                onSeeMoreClick = { petId ->
+                    navController.navigate("pet_edit/$petId")
                 }
             )
         }
@@ -83,11 +83,12 @@ fun HomeNavGraph(
                     paddingValues = paddingValues,
                     petId = it,
                     onUpdatePet = {
-                        navController.navigate("my_adoption_pets") {
-                            popUpTo("my_adoption_pets") {
-                                inclusive = false
-                            }
-                        }
+                        navController.popBackStack()
+//                        navigate("my_adoption_pets") {
+//                            popUpTo("my_adoption_pets") {
+//                                inclusive = false
+//                            }
+//                        }
                     }
                 )
             }

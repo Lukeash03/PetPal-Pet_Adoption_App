@@ -88,7 +88,7 @@ class HomeRepositoryImpl @Inject constructor(
             "weight" to weight,
             "color" to pet.color,
             "description" to pet.description,
-            "vaccineStatus" to pet.vaccinationStatus,
+            "vaccinationStatus" to pet.vaccinationStatus,
             "publishDate" to pet.publishDate,
             "photos" to finalPhotosUrls
         )

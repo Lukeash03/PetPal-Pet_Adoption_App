@@ -11,7 +11,7 @@ data class Pet(
     val weight: Int? = null,
     val color: String? = null,
     var photos: List<String>? = null,
-    val vaccinationStatus: Boolean? = null,
+    val vaccinationStatus: Boolean = false,
     val publishDate: Long? = null,
     val description: String? = null
 )

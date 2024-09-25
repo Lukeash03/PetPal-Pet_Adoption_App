@@ -234,11 +234,12 @@ fun UpdatePetCard(
     var vaccineSwitch by remember {
         mutableStateOf(
             ToggleableInfo(
-                isChecked = pet.vaccinationStatus == true,
+                isChecked = (pet.vaccinationStatus == true),
                 text = "Vaccine Status"
             )
         )
     }
+
     var petDescription by remember { mutableStateOf(pet.description ?: "") }
     var updatedPet: Pet
 
