@@ -12,11 +12,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults.containerColor
@@ -27,6 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +64,8 @@ fun HomeScreen(
     navController: NavHostController = rememberNavController(),
     logout: () -> Unit,
     activity: Activity,
-    splashScreenCompleted: Boolean
+    splashScreenCompleted: Boolean,
+    isDarkModeActive: Boolean
 ) {
 
     BackHandler {
@@ -82,7 +87,7 @@ fun HomeScreen(
         }
     }
 
-    var showDialog by remember { mutableStateOf(false) }
+//    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -97,44 +102,58 @@ fun HomeScreen(
             val currentDestination = navBackStackEntry?.destination
 
             val bottomBarDestination = screens.any { it.route == currentDestination?.route }
-//            if (bottomBarDestination) {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                },
-                title = {
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        fontFamily = FontFamily.Cursive,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            homeViewModel?.logout()
-
-                            logout()
+            if (bottomBarDestination) {
+                TopAppBar(
+                    navigationIcon = {
+                        IconButton(onClick = { }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.onBackground
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.app_name),
+                            fontFamily = FontFamily.Cursive,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    },
+                    actions = {
+                        IconToggleButton(
+                            checked = isDarkModeActive,
+                            onCheckedChange = {
+                                homeViewModel?.updateIsDarkModeActive(
+                                    isDarkModeActive = it
+                                )
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (isDarkModeActive) Icons.Default.LightMode
+                                else Icons.Default.DarkMode,
+                                contentDescription = "DarkMode Toggle",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                homeViewModel?.logout()
+                                logout()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
-//            }
+            }
         },
         bottomBar = {
             BottomBar(navController = navController)
@@ -236,7 +255,8 @@ fun HomeScreenPreviewLight() {
             rememberNavController(),
             logout = { },
             activity = Activity(),
-            true
+            splashScreenCompleted = true,
+            isDarkModeActive = false
         )
     }
 }
@@ -250,7 +270,8 @@ fun HomeScreenPreviewDark() {
             rememberNavController(),
             logout = { },
             activity = Activity(),
-            true
+            true,
+            isDarkModeActive = true
         )
     }
 }

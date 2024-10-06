@@ -82,6 +82,7 @@ import com.luke.petpal.presentation.components.PetDetailsDropdownTextField
 import com.luke.petpal.presentation.components.PetDetailsTextField
 import com.luke.petpal.presentation.components.PetDetailsTextFieldWithDatePicker
 import com.luke.petpal.presentation.theme.PetPalTheme
+import com.luke.petpal.presentation.validation.PetFormEvent
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -97,6 +98,8 @@ fun AddPetScreen(
     paddingValues: PaddingValues,
     onAddPet: () -> Unit
 ) {
+
+    val context = LocalContext.current
 
     var petName by remember { mutableStateOf("") }
 
@@ -131,9 +134,7 @@ fun AddPetScreen(
         )
     }
     var petDescription by remember { mutableStateOf("") }
-    var pet: Pet
 
-    val context = LocalContext.current
     var imageStrings by remember { mutableStateOf<List<String>?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -148,29 +149,41 @@ fun AddPetScreen(
 
     val uploadStatus = homeViewModel?.uploadStatus?.collectAsState()
 
-    val validateInput: () -> Boolean = {
-        when {
-            petName.isBlank() -> {
-                Toast.makeText(context, "Please enter a pet name.", Toast.LENGTH_SHORT).show()
-                false
-            }
+    val petValidationState = homeViewModel?.petValidationState
+    val validationEvents = homeViewModel?.validationEvents?.collectAsState(initial = null)
+    validationEvents?.value?.let { event ->
+        when (event) {
+            is HomeViewModel.ValidationEvent.Success -> {
+                val compressedPhotoStrings = imageStrings?.let {
+                    homeViewModel.compressImages(it, context)
+                }
 
-            selectedSpecies.isBlank() -> {
-                Toast.makeText(context, "Please select a species.", Toast.LENGTH_SHORT).show()
-                false
-            }
+                val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                val localDate = LocalDate.parse(formattedDate, formatter)
 
-            petBreed.isBlank() -> {
-                Toast.makeText(context, "Please enter a breed.", Toast.LENGTH_SHORT).show()
-                false
-            }
+                val dobTimestamp: Long =
+                    localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                        .toEpochMilli()
 
-            petGender.isBlank() -> {
-                Toast.makeText(context, "Please select a gender.", Toast.LENGTH_SHORT).show()
-                false
-            }
+                val pet = Pet(
+                    name = petName,
+                    species = selectedSpecies,
+                    breed = petBreed,
+                    gender = petGender,
+                    dob = dobTimestamp,
+                    weight = petWeight.toIntOrNull(),
+                    color = petColor,
+                    photos = compressedPhotoStrings,
+                    vaccinationStatus = vaccineSwitch.isChecked,
+                    description = petDescription,
+                    publishDate = LocalDate.now().toEpochDay()
+                )
 
-            else -> true
+                // Call ViewModel to upload the pet
+                LaunchedEffect(Unit) {
+                    homeViewModel.uploadPet(pet)
+                }
+            }
         }
     }
 
@@ -207,12 +220,10 @@ fun AddPetScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-//                        .verticalScroll(rememberScrollState())
-                    ,
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     shape = RoundedCornerShape(15.dp),
                     elevation = CardDefaults.cardElevation(10.dp),
-//                    colors = CardDefaults.cardColors()
+                    colors = CardDefaults.cardColors()
                 ) {
                     Column(
                         modifier = Modifier
@@ -235,12 +246,24 @@ fun AddPetScreen(
                         Column {
                             PetDetailsTextField(
                                 value = petName,
-                                onValueChange = { petName = it },
+                                onValueChange = {
+                                    petName = it
+                                    homeViewModel?.onEvent(PetFormEvent.PetNameChanged(it))
+                                },
+                                isError = petValidationState?.petNameError != null,
                                 label = "Pet Name",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
                             )
+                            if (petValidationState?.petNameError != null) {
+                                Text(
+                                    text = petValidationState.petNameError,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.align(Alignment.End)
+                                )
+                            }
 
                             Row(
                                 modifier = Modifier.padding(vertical = 4.dp),
@@ -249,44 +272,79 @@ fun AddPetScreen(
                             ) {
 
                                 // Species Dropdown
-                                Box(
-                                    modifier = Modifier.weight(1f)
-                                ) {
+                                Column(modifier = Modifier.weight(1f)) {
                                     PetDetailsDropdownTextField(
                                         value = selectedSpecies,
-                                        onValueChange = { selectedSpecies = it },
+                                        onValueChange = {
+                                            selectedSpecies = it
+                                            homeViewModel?.onEvent(PetFormEvent.PetSpeciesChanged(it))
+                                        },
                                         label = "Species",
                                         options = speciesOptions,
                                         expanded = speciesExpanded,
                                         onExpandedChange = { speciesExpanded = it },
                                         focusRequester = focusRequester
                                     )
+                                    if (petValidationState?.petSpeciesError != null) {
+                                        Text(
+                                            text = petValidationState.petSpeciesError,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.align(Alignment.End)
+                                        )
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.width(8.dp))
 
-                                // Breed TextField
-                                PetDetailsTextField(
-                                    value = petBreed,
-                                    onValueChange = { petBreed = it },
-                                    label = "Breed",
-                                    modifier = Modifier
-                                        .weight(1f)
-                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    // Breed TextField
+                                    PetDetailsTextField(
+                                        value = petBreed,
+                                        onValueChange = {
+                                            petBreed = it
+                                            homeViewModel?.onEvent(PetFormEvent.PetBreedChanged(it))
+                                        },
+                                        isError = petValidationState?.petBreedError != null,
+                                        label = "Breed",
+                                        modifier = Modifier
+                                    )
+                                    if (petValidationState?.petBreedError != null) {
+                                        Text(
+                                            text = petValidationState.petBreedError,
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.align(Alignment.End)
+                                        )
+                                    }
+                                }
                             }
 
                             Row(modifier = Modifier.padding(vertical = 4.dp)) {
 
                                 Box(modifier = Modifier.weight(1f)) {
-                                    PetDetailsDropdownTextField(
-                                        value = petGender,
-                                        onValueChange = { petGender = it },
-                                        label = "Gender",
-                                        options = listOf("Male", "Female"),
-                                        expanded = genderExpanded,
-                                        onExpandedChange = { genderExpanded = it },
-                                        focusRequester = focusRequester
-                                    )
+                                    Column {
+                                        PetDetailsDropdownTextField(
+                                            value = petGender,
+                                            onValueChange = {
+                                                petGender = it
+                                                homeViewModel?.onEvent(PetFormEvent.PetGenderChanged(it))
+                                            },
+                                            label = "Gender",
+                                            options = listOf("Male", "Female"),
+                                            expanded = genderExpanded,
+                                            onExpandedChange = { genderExpanded = it },
+                                            focusRequester = focusRequester
+                                        )
+                                        if (petValidationState?.petGenderError != null) {
+                                            Text(
+                                                text = petValidationState.petGenderError,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier.align(Alignment.End)
+                                            )
+                                        }
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -308,6 +366,7 @@ fun AddPetScreen(
                                 PetDetailsTextField(
                                     value = petWeight,
                                     onValueChange = { petWeight = it },
+                                    isError = false,
                                     label = "Weight",
                                     modifier = Modifier
                                         .weight(1f),
@@ -321,6 +380,7 @@ fun AddPetScreen(
                                 PetDetailsTextField(
                                     value = petColor,
                                     onValueChange = { petColor = it },
+                                    isError = false,
                                     label = "Color",
                                     modifier = Modifier
                                         .weight(1f)
@@ -330,6 +390,7 @@ fun AddPetScreen(
                             PetDetailsTextField(
                                 value = petDescription,
                                 onValueChange = { petDescription = it },
+                                isError = false,
                                 label = "Description",
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -480,37 +541,7 @@ fun AddPetScreen(
 
                         Button(
                             onClick = {
-                                if (validateInput()) {
-                                    val photoUrls: List<Uri>? = imageStrings?.map { Uri.parse(it) }
-                                    val compressedPhotoUri =
-                                        photoUrls?.let { compressImages(it, context = context) }
-                                    val compressedPhotoStrings =
-                                        compressedPhotoUri?.map { it.toString() }
-
-                                    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-                                    val localDate = LocalDate.parse(formattedDate, formatter)
-
-//                                  Convert LocalDate to Long timestamp
-                                    val dobTimestamp: Long =
-                                        localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
-                                            .toEpochMilli()
-
-                                    pet = Pet(
-                                        name = petName,
-                                        species = selectedSpecies,
-                                        breed = petBreed,
-                                        gender = petGender,
-                                        dob = dobTimestamp,
-                                        weight = petWeight.toInt(),
-                                        color = petColor,
-                                        photos = compressedPhotoStrings,
-                                        vaccinationStatus = vaccineSwitch.isChecked,
-                                        description = petDescription,
-                                        publishDate = LocalDate.now().toEpochDay()
-                                    )
-
-                                    homeViewModel?.uploadPet(pet)
-                                }
+                                homeViewModel?.onEvent(PetFormEvent.Submit)
                             },
                             Modifier
                                 .fillMaxWidth()

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,77 +40,82 @@ fun AdoptionPetCard(
     pet: Pet,
     onSeeMoreClick: (String?) -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier
-    ) {
-        Row(
+    Column {
+
+        Card(
+            shape = RoundedCornerShape(20.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .background(cardColorPrimaryLight)
-                .padding(vertical = 6.dp, horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(70.dp)
-                    .clip(CircleShape)
-                    .background(Color.Transparent)
+                    .fillMaxWidth()
+                    .background(cardColorPrimaryLight)
+                    .padding(vertical = 6.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val painter = rememberAsyncImagePainter(
-                    model = pet.photos?.firstOrNull() ?: R.drawable.lab_1
-                )
-                Image(
-                    painter = painter,
-                    contentDescription = "Pet Image",
-                    contentScale = ContentScale.FillBounds
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = pet.name ?: "Waffles",
-                    color = MaterialTheme.colorScheme.background,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp
-                )
-                Row {
-                    Text(
-                        text = pet.species ?: "Dog",
-                        color = MaterialTheme.colorScheme.background,
-                        fontSize = 12.sp
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(CircleShape)
+                        .background(Color.Transparent)
+                ) {
+                    val painter = rememberAsyncImagePainter(
+                        model = pet.photos?.firstOrNull() ?: R.drawable.lab_1
                     )
-                    Text(
-                        text = " - ",
-                        color = MaterialTheme.colorScheme.background,
-                        fontSize = 12.sp
+                    Image(
+                        painter = painter,
+                        contentDescription = "Pet Image",
+                        contentScale = ContentScale.FillBounds
                     )
-                    Text(
-                        text = pet.breed ?: "Labrador",
-                        color = MaterialTheme.colorScheme.background,
-                        fontSize = 12.sp
-                    )
-
                 }
-            }
 
-            Text(
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(end = 8.dp)
-                    .clickable {
-                        onSeeMoreClick(pet.petId)
-                    },
-                text = "See more >",
-                color = MaterialTheme.colorScheme.background,
-                textDecoration = TextDecoration.Underline
-            )
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = pet.name ?: "Waffles",
+                        color = MaterialTheme.colorScheme.background,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 26.sp
+                    )
+                    Row {
+                        Text(
+                            text = pet.species ?: "Dog",
+                            color = MaterialTheme.colorScheme.background,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = " - ",
+                            color = MaterialTheme.colorScheme.background,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = pet.breed ?: "Labrador",
+                            color = MaterialTheme.colorScheme.background,
+                            fontSize = 12.sp
+                        )
+
+                    }
+                }
+
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
+                        .padding(end = 8.dp)
+                        .clickable {
+                            onSeeMoreClick(pet.petId)
+                        },
+                    text = "See more >",
+                    color = MaterialTheme.colorScheme.background,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

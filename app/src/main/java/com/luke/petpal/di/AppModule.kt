@@ -9,13 +9,20 @@ import com.google.firebase.database.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.repository.AuthRepository
+import com.luke.petpal.data.repository.ChatRepository
 import com.luke.petpal.data.repository.HomeRepository
 import com.luke.petpal.data.repository.UserProfileRepository
 import com.luke.petpal.domain.repository.AuthRepositoryImpl
+import com.luke.petpal.domain.repository.ChatRepositoryImpl
 import com.luke.petpal.domain.repository.HomeRepositoryImpl
 import com.luke.petpal.domain.repository.UserProfileRepositoryImpl
+import com.luke.petpal.domain.repository.usecase.CompressImagesUseCase
 import com.luke.petpal.domain.repository.usecase.ValidateEmail
 import com.luke.petpal.domain.repository.usecase.ValidatePassword
+import com.luke.petpal.domain.repository.usecase.ValidatePetBreed
+import com.luke.petpal.domain.repository.usecase.ValidatePetGender
+import com.luke.petpal.domain.repository.usecase.ValidatePetName
+import com.luke.petpal.domain.repository.usecase.ValidatePetSpecies
 import com.luke.petpal.domain.repository.usecase.ValidateUsername
 import com.luke.petpal.presentation.auth.googlesignin.GoogleAuthUIClient
 import dagger.Module
@@ -39,6 +46,21 @@ class AppModule {
     fun provideValidatePassword(): ValidatePassword = ValidatePassword()
 
     @Provides
+    fun provideValidatePetName(): ValidatePetName = ValidatePetName()
+
+    @Provides
+    fun provideValidatePetSpecies(): ValidatePetSpecies = ValidatePetSpecies()
+
+    @Provides
+    fun provideValidatePetBreed(): ValidatePetBreed = ValidatePetBreed()
+
+    @Provides
+    fun provideValidatePetGender(): ValidatePetGender = ValidatePetGender()
+
+    @Provides
+    fun provideCompressImageUseCase(): CompressImagesUseCase = CompressImagesUseCase()
+
+    @Provides
     fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
@@ -58,6 +80,9 @@ class AppModule {
 
     @Provides
     fun provideProfileImageRepository(impl: UserProfileRepositoryImpl): UserProfileRepository = impl
+
+    @Provides
+    fun provideChatRepository(impl: ChatRepositoryImpl): ChatRepository = impl
 
     @Provides
     @Singleton

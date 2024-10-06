@@ -6,14 +6,18 @@ import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.luke.petpal.navigation.RootNavGraph
+import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.theme.PetPalTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +28,8 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-            permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
+            permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        ) {
             // Location permissions granted
         } else {
             // Handle permission denied
@@ -71,11 +76,17 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+//        enableEdgeToEdge()
         setContent {
-            PetPalTheme {
+            val homeViewModel: HomeViewModel = hiltViewModel()
+            val isDarkModeActive by homeViewModel.isDarkModeActive.collectAsState(initial = false)
+            PetPalTheme(
+                darkTheme = isDarkModeActive
+            ) {
                 RootNavGraph(
                     navController = rememberNavController(),
-                    splashScreenCompleted = splashScreenCompleted
+                    splashScreenCompleted = splashScreenCompleted,
+                    isDarkModeActive = isDarkModeActive
                 )
             }
         }

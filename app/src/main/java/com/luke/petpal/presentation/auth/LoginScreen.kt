@@ -31,6 +31,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -247,10 +248,10 @@ fun LoginScreen(
                     }
                 }
 
-                Divider(
-                    color = Color.Gray,
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
                     thickness = 1.dp,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    color = Color.Gray
                 )
 
                 Button(

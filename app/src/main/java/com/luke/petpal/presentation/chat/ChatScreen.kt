@@ -1,30 +1,47 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.luke.petpal.presentation.chat
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,117 +51,166 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import com.luke.petpal.R
+import com.luke.petpal.data.models.Resource
 import com.luke.petpal.domain.data.Message
 import com.luke.petpal.presentation.theme.PetPalTheme
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun ChatScreen(
-    navController: NavController,
-    channelId: String,
-    chatViewModel: ChatViewModel
+    chatId: String,
+    chatViewModel: ChatViewModel?
 ) {
-    LaunchedEffect(key1 = true) {
-        chatViewModel.listenForMessages(channelId)
+
+    val userId = chatViewModel?.userId
+    val messageState = chatViewModel?.messages?.collectAsState()
+
+    var newMessage by remember { mutableStateOf("") }
+    val scrollState = rememberLazyListState()
+
+    LaunchedEffect(chatId) {
+        chatViewModel?.fetchMessages(chatId)
     }
-    val messages = chatViewModel.messages.collectAsState()
-    ChatMessages(
-        messages = messages.value,
-        onSendMessage = { message ->
-            chatViewModel.sendMessage(channelId, message)
-        })
-}
 
-@Composable
-fun ChatMessages(
-    messages: List<Message>,
-    onSendMessage: (String) -> Unit,
-) {
-    val hideKeyboardController = LocalSoftwareKeyboardController.current
-    val msg = remember {
-        mutableStateOf("")
-    }
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            items(messages) { message ->
-                ChatBubble(message = message)
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(8.dp)
-                .background(Color.LightGray),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            TextField(
-                value = msg.value,
-                onValueChange = { msg.value = it },
+    Scaffold(
+        topBar = {
+            TopAppBar(
                 modifier = Modifier
-                    .weight(1f),
-                placeholder = { Text(text = "Type a message") },
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        hideKeyboardController?.hide()
+//                    .padding(vertical = 12.dp)
+                        ,
+                navigationIcon = {
+                    IconButton(onClick = { }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.background
+                        )
                     }
+                },
+                title = {
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(Color.Transparent)
+                        ) {
+                            val painter = rememberAsyncImagePainter(
+                                model = R.drawable.lab_1
+                            )
+                            Image(
+                                painter = painter,
+                                contentDescription = "User Image",
+                                contentScale = ContentScale.FillHeight
+                            )
+                        }
+
+                        Text(
+                            text = "Username",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
             )
-            IconButton(onClick = {
-                onSendMessage(msg.value)
-                msg.value = ""
-            }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "send")
-            }
-
         }
-    }
-}
+    ) { paddingValue ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValue.calculateTopPadding()),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
 
-@Composable
-fun ChatBubble(message: Message) {
-    val isCurrentUser = message.senderId == Firebase.auth.currentUser?.uid
-    val bubbleColor = if (isCurrentUser) {
-        Color.Blue
-    } else {
-        Color.Green
-    }
+            // Messages list
+            when (messageState?.value) {
+                is Resource.Loading -> {
+                    CircularProgressIndicator()
+                }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        val alignment = if (isCurrentUser) Alignment.CenterStart else Alignment.CenterEnd
+                is Resource.Failure -> {
+                    Text(text = "Failed to load messages")
+                }
 
-        Box(contentAlignment = alignment) {
-            Box(
+                is Resource.Success -> {
+                    val messages = (messageState.value as Resource.Success<List<Message>>).result
+                    LazyColumn {
+                        items(messages) { message ->
+                            if (userId != null) {
+                                ChatMessageItem(message = message, userId)
+                            }
+                        }
+                    }
+                }
+
+                null -> {  }
+            }
+            LazyColumn(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .background(color = bubbleColor, RoundedCornerShape(8.dp))
+                    .weight(1f)
+                    .padding(8.dp),
+                state = scrollState,
+                reverseLayout = true
             ) {
-                Text(
-                    text = message.message,
-                    color = Color.White,
-                    modifier = Modifier.padding(8.dp)
-                )
+//            items(messageState) { message ->
+//                ChatMessageItem(message = message)
+//            }
             }
 
+            // Input field and send button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = newMessage,
+                    onValueChange = { newMessage = it },
+                    placeholder = { Text("Type a message...") },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
+                )
+
+                Button(
+                    onClick = {
+                        if (newMessage.isNotBlank()) {
+                            Log.i("ChatScreen", "ChatId: $chatId")
+                            chatViewModel?.sendMessage(chatId, newMessage)
+                            newMessage = ""
+                        }
+                    }
+                ) {
+                    Text("Send")
+                }
+            }
         }
     }
 }
@@ -153,84 +219,20 @@ fun ChatBubble(message: Message) {
 @Composable
 fun ChatScreenPreview() {
     PetPalTheme {
-//        ChatScreen(navController = rememberNavController(), channelId = 0.toString(), chatViewModel = null)
-        val mockMessages = listOf(
-            Message(
-                message = "Hello! How are you?",
-                senderId = "otherUserId",
-                createdAt = System.currentTimeMillis()
-            ),
-            Message(
-                message = "I'm good, thanks! How about you?",
-                senderId = "currentUserId",
-                createdAt = System.currentTimeMillis()
-            ),
-            Message(
-                message = "Doing well! What are you up to?",
-                senderId = "otherUserId",
-                createdAt = System.currentTimeMillis()
-            )
-        )
-
-            ChatScreen(messages = mockMessages, onSendMessage = {})
+        ChatScreen("", null)
     }
 }
 
 @Composable
-fun ChatScreen(messages: List<Message>, onSendMessage: (String) -> Unit) {
-    var newMessage by remember { mutableStateOf("") }
-    val scrollState = rememberLazyListState()
+fun ChatMessageItem(message: Message, userId: String) {
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Messages list
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp),
-            state = scrollState,
-            reverseLayout = true
-        ) {
-            items(messages) { message ->
-                ChatMessageItem(message = message)
-            }
-        }
+    Log.i("ChatScreen", "Message: $message")
+    val isCurrentUser = message.senderId == userId // Replace with actual user ID
 
-        // Input field and send button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = newMessage,
-                onValueChange = { newMessage = it },
-                placeholder = { Text("Type a message...") },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-            )
+    val dateFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val formattedTime = dateFormat.format(message.createdAt)
 
-            Button(
-                onClick = {
-                    if (newMessage.isNotBlank()) {
-                        onSendMessage(newMessage)
-                        newMessage = ""
-                    }
-                }
-            ) {
-                Text("Send")
-            }
-        }
-    }
-}
-
-@Composable
-fun ChatMessageItem(message: Message) {
-    val isCurrentUser = message.senderId == "currentUserId" // Replace with actual user ID
+    var isTimestampVisible by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -240,14 +242,44 @@ fun ChatMessageItem(message: Message) {
         // Message bubble
         Box(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(vertical = 4.dp, horizontal = 8.dp)
                 .background(
-                    color = if (isCurrentUser) Color(0xFFDCF8C6) else Color.White,
+                    color = if (isCurrentUser) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(8.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    isTimestampVisible = !isTimestampVisible
+                }
         ) {
-            Text(text = message.message)
+            Column {
+                // Message text
+                Text(
+                    text = message.message,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                // Timestamp
+                AnimatedVisibility(
+                    visible = isTimestampVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    Text(
+                        text = formattedTime,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        fontSize = 10.sp,
+                        modifier = Modifier
+//                            .align(Alignment.End) // Align timestamp to the right
+                    )
+                }
+            }
         }
     }
 }

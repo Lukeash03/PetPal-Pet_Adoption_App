@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.database)
 
+
     implementation(libs.play.services.auth)
 
     // Dagger hilt
@@ -131,4 +132,11 @@ dependencies {
     // Constraint Layout
     implementation(libs.androidx.constraintlayout.compose)
 
+    // Preferences DataStore
+    implementation(libs.androidx.datastore.preferences)
+
 }
+
+//kapt {
+//    correctErrorTypes = true
+//}

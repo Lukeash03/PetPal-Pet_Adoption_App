@@ -5,6 +5,7 @@ package com.luke.petpal.presentation.screens
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,15 +42,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.components.AdoptionPetCard
+import com.luke.petpal.presentation.components.ShimmerListItem
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AdoptionScreen(
     homeViewModel: HomeViewModel?,
@@ -63,7 +69,7 @@ fun AdoptionScreen(
 
     fun refresh() = refreshScope.launch {
         refreshing = true
-        delay(500)
+        delay(1000)
         homeViewModel?.fetchPets()
         refreshing = false
     }
@@ -75,6 +81,12 @@ fun AdoptionScreen(
 
     val petList = homeViewModel?.petList?.collectAsState(emptyList())?.value ?: emptyList()
     val selectedSpecies = homeViewModel?.selectedSpecies?.collectAsState()
+
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(key1 = true) {
+        delay(2000)
+        isLoading = false
+    }
 
     Box(
         modifier = Modifier
@@ -89,120 +101,153 @@ fun AdoptionScreen(
             .pullRefresh(pullToRefreshState),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
 
-                FilterChip(
-                    label = { Text(text = "Cat") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Cat",
-                    onClick = { homeViewModel?.setSpeciesFilter("Cat") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Cat") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .pullRefresh(pullToRefreshState),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+
+                            FilterChip(
+                                label = { Text(text = "Cat") },
+                                shape = RoundedCornerShape(10.dp),
+                                selected = selectedSpecies?.value == "Cat",
+                                onClick = { homeViewModel?.setSpeciesFilter("Cat") },
+                                trailingIcon = {
+                                    AnimatedVisibility(visible = selectedSpecies?.value == "Cat") {
+                                        IconButton(
+                                            modifier = Modifier.height(24.dp),
+                                            onClick = { homeViewModel?.setSpeciesFilter(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Cancel,
+                                                contentDescription = "Cancel selection"
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = appColorPrimary
                                 )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            FilterChip(
+                                label = { Text(text = "Dog") },
+                                shape = RoundedCornerShape(10.dp),
+                                selected = selectedSpecies?.value == "Dog",
+                                onClick = { homeViewModel?.setSpeciesFilter("Dog") },
+                                trailingIcon = {
+                                    AnimatedVisibility(visible = selectedSpecies?.value == "Dog") {
+                                        IconButton(
+                                            modifier = Modifier.height(24.dp),
+                                            onClick = { homeViewModel?.setSpeciesFilter(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Cancel,
+                                                contentDescription = "Cancel selection"
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = appColorPrimary
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            FilterChip(
+                                label = { Text(text = "Bird") },
+                                shape = RoundedCornerShape(10.dp),
+                                selected = selectedSpecies?.value == "Bird",
+                                onClick = { homeViewModel?.setSpeciesFilter("Bird") },
+                                trailingIcon = {
+                                    AnimatedVisibility(visible = selectedSpecies?.value == "Bird") {
+                                        IconButton(
+                                            modifier = Modifier.height(24.dp),
+                                            onClick = { homeViewModel?.setSpeciesFilter(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Cancel,
+                                                contentDescription = "Cancel selection"
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = appColorPrimary
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            FilterChip(
+                                label = { Text(text = "Other") },
+                                shape = RoundedCornerShape(10.dp),
+                                selected = selectedSpecies?.value == "Other",
+                                onClick = { homeViewModel?.setSpeciesFilter("Other") },
+                                trailingIcon = {
+                                    AnimatedVisibility(visible = selectedSpecies?.value == "Other") {
+                                        IconButton(
+                                            modifier = Modifier.height(24.dp),
+                                            onClick = { homeViewModel?.setSpeciesFilter(null) }) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Cancel,
+                                                contentDescription = "Cancel selection"
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = appColorPrimary
+                                )
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                text = "Adoption Pets",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+
+                            Button(
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .padding(bottom = 12.dp),
+                                onClick = { onMyPostClick() }
+                            ) {
+                                Text(text = "My Posts")
                             }
                         }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
 
-                FilterChip(
-                    label = { Text(text = "Dog") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Dog",
-                    onClick = { homeViewModel?.setSpeciesFilter("Dog") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Dog") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FilterChip(
-                    label = { Text(text = "Bird") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Bird",
-                    onClick = { homeViewModel?.setSpeciesFilter("Bird") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Bird") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FilterChip(
-                    label = { Text(text = "Other") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Other",
-                    onClick = { homeViewModel?.setSpeciesFilter("Other") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Other") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
+                    }
+                }
             }
-
-            Button(
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .padding(bottom = 12.dp),
-                onClick = { onMyPostClick() }
-            ) {
-                Text(text = "My Posts")
-            }
-
-            LazyColumn(
-                modifier = Modifier.padding()
-            ) {
+            if (isLoading) {
+                items(10) {
+                    ShimmerListItem(
+                        isLoading = isLoading,
+                        contentAfterLoading = { },
+                        modifier = Modifier.padding()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            } else {
                 if (!refreshing) {
-                    items(petList) { pet ->
-                        Log.i("AdoptionScreen", "Inside lazy column: $pet")
+                    items(petList.sortedByDescending { pet -> pet.publishDate }) { pet ->
                         AdoptionPetCard(
                             pet = pet,
                             onSeeMoreClick = { documentId ->
@@ -211,7 +256,6 @@ fun AdoptionScreen(
                                 }
                             }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
@@ -220,9 +264,9 @@ fun AdoptionScreen(
         PullRefreshIndicator(
             refreshing = refreshing,
             state = pullToRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
         )
-
     }
 
 }

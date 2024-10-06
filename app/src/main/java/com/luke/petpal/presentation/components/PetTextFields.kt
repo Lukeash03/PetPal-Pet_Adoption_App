@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 fun PetDetailsTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    isError: Boolean,
     label: String,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -40,6 +41,7 @@ fun PetDetailsTextField(
     TextField(
         value = value,
         onValueChange = onValueChange,
+        isError = isError,
         label = { Text(label) },
         keyboardOptions = keyboardOptions.copy(imeAction = imeAction),
         modifier = modifier,
@@ -48,13 +50,16 @@ fun PetDetailsTextField(
         colors = TextFieldDefaults.colors(
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.5f),
             focusedTextColor = MaterialTheme.colorScheme.onBackground.copy(0.6f),
+            errorTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
             focusedContainerColor = MaterialTheme.colorScheme.background,
+            errorContainerColor = MaterialTheme.colorScheme.background,
             focusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+            errorLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-        )
+            errorIndicatorColor = Color.Transparent,        )
     )
 }
 

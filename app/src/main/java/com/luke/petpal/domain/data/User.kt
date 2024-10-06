@@ -6,7 +6,7 @@ data class User(
     var username: String = "",
     var profileImageUrl: String = "",
     var location: Location? = null
-)
+    )
 
 data class Location(
     var latitude: Double = 0.0,

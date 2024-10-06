@@ -6,7 +6,7 @@ data class Pet(
     val name: String? = null,
     val species: String? = null,
     val breed: String? = null,
-    val gender: String? = null,
+    val gender: String = "",
     val dob: Long? = null,
     val weight: Int? = null,
     val color: String? = null,

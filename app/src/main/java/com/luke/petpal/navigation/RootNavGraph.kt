@@ -19,7 +19,8 @@ import com.luke.petpal.presentation.auth.AuthViewModel
 fun RootNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    splashScreenCompleted: Boolean
+    splashScreenCompleted: Boolean,
+    isDarkModeActive: Boolean
 ) {
 
     val authViewModel: AuthViewModel = hiltViewModel()
@@ -46,7 +47,8 @@ fun RootNavGraph(
                     }
                 },
                 activity = activity,
-                splashScreenCompleted = splashScreenCompleted
+                splashScreenCompleted = splashScreenCompleted,
+                isDarkModeActive = isDarkModeActive
             )
         }
     }

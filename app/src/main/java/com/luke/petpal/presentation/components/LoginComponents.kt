@@ -72,19 +72,19 @@ fun UsernameInput(
         ),
         colors = TextFieldDefaults.colors(
             focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-            errorTextColor = MaterialTheme.colorScheme.onBackground,
             focusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
             focusedContainerColor = MaterialTheme.colorScheme.background,
-            unfocusedContainerColor = MaterialTheme.colorScheme.background,
-            errorIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedIndicatorColor = Color.Transparent,
+            errorTextColor = MaterialTheme.colorScheme.onBackground,
+            errorIndicatorColor = Color.Transparent,
         )
     )
 }

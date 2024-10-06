@@ -107,7 +107,7 @@ class AuthViewModel @Inject constructor(
             usernameResult,
             emailResult,
             passwordResult
-        ).any() { !it.successful }
+        ).any { !it.successful }
 
         if (hasError) {
             state = state.copy(

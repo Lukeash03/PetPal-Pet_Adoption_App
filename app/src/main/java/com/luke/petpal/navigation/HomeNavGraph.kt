@@ -12,7 +12,9 @@ import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.screens.AddPetScreen
 import com.luke.petpal.presentation.screens.AdoptionScreen
-import com.luke.petpal.presentation.chat.ChatHomeScreen
+import com.luke.petpal.presentation.chat.ChatListScreen
+import com.luke.petpal.presentation.chat.ChatScreen
+import com.luke.petpal.presentation.chat.ChatViewModel
 import com.luke.petpal.presentation.screens.DetailedPetScreen
 import com.luke.petpal.presentation.screens.LikedScreen
 import com.luke.petpal.presentation.screens.MyAdoptionPetScreen
@@ -27,6 +29,7 @@ fun HomeNavGraph(
 ) {
 
     val userProfileViewModel: UserProfileViewModel = hiltViewModel()
+    val chatViewModel: ChatViewModel = hiltViewModel()
 
     val homeNavGraph: NavGraph = navController.createGraph(
         startDestination = BottomBarScreen.Home.route,
@@ -103,21 +106,27 @@ fun HomeNavGraph(
             )
         }
         composable(route = BottomBarScreen.Chat.route) {
-            ChatHomeScreen(
-                navController = navController,
-                paddingValues = paddingValues
+            ChatListScreen(
+                chatViewModel = chatViewModel,
+                paddingValues = paddingValues,
+                onChatClick = { chatId ->
+                    navController.navigate("chat_screen/$chatId")
+                }
             )
         }
-        composable(route = "chat_screen/{chatId}") {
-
+        composable(route = "chat_screen/{chatId}") { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId")
+            chatId?.let {
+                ChatScreen(chatId = chatId, chatViewModel = chatViewModel)
+            }
         }
         composable(route = BottomBarScreen.Personal.route) {
             PersonalScreen(
                 userProfileViewModel,
                 paddingValues,
-//                onAdoptionPetClick = {
-//                    navController.navigate("my_adoption_pets")
-//                }
+                onAddPetClick = {
+                    navController.navigate("add_pet")
+                }
             )
         }
     }

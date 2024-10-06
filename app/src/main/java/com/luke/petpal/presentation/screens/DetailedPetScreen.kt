@@ -1,6 +1,5 @@
 @file:OptIn(
-    ExperimentalFoundationApi::class, ExperimentalFoundationApi::class,
-    ExperimentalFoundationApi::class, ExperimentalFoundationApi::class
+    ExperimentalFoundationApi::class,
 )
 
 package com.luke.petpal.presentation.screens
@@ -98,7 +97,7 @@ fun DetailedPetScreen(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
-                    .padding(top = 12.dp, start = 16.dp)
+                    .padding(top = 12.dp, start = 16.dp, bottom = 12.dp)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
@@ -140,7 +139,7 @@ fun DetailedPetScreen(
                             PetCard(homeViewModel, pet, onChatClick)
                         }
 
-                        null -> TODO()
+                        null -> { }
                     }
 
                 }
@@ -170,6 +169,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
     }
 
     val user = homeViewModel?.userById?.collectAsState()
+    val createChatState = homeViewModel?.createChatState?.collectAsState()
 
     val isLiked = homeViewModel?.isLiked?.collectAsState()
     val likeStatus = homeViewModel?.likeStatus?.collectAsState()
@@ -196,7 +196,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
                     .weight(1f)
             ) {
                 Text(
-                    text = pet?.name.toString() ?: "Pet Name",
+                    text = pet?.name.toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground
@@ -422,18 +422,39 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Button(
-                onClick = { },
+                onClick = {
+                    homeViewModel?.createChat(petOwnerId = pet?.userId.toString())
+                },
                 Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Box {
+                    createChatState?.value?.let { state ->
+                        when (state) {
+                            is Resource.Failure -> {
+                                Log.e("DetailedPetScreen","Failed to create chat: ${state.exception.message}")
+                            }
+
+                            Resource.Loading -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.padding(8.dp),
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+
+                            is Resource.Success -> {
+                                onChatClick(state.result)
+                            }
+                        }
+                    }
                     Text(
                         text = "Chat",
                         Modifier.padding(8.dp)
                     )
                 }
             }
+
             Button(
                 onClick = {
                     if (pet?.petId != null) {
@@ -446,9 +467,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Box(
-//                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Box {
                     when (likeStatus?.value) {
                         is Resource.Loading -> {
                             CircularProgressIndicator(
@@ -470,19 +489,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
                     }
                 }
             }
-//            Button(
-//                onClick = { },
-//                Modifier.weight(1f),
-//                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-//                shape = RoundedCornerShape(10.dp)
-//            ) {
-//                Box {
-//                    Text(
-//                        text = "Add to liked",
-//                        Modifier.padding(8.dp)
-//                    )
-//                }
-//            }
+
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -496,7 +503,7 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
 fun DetailedPetScreenPreviewLight() {
     PetPalTheme {
         PetPalTheme {
-            PetCard(null, null) {  }
+            PetCard(null, null) { }
         }
     }
 }
@@ -505,6 +512,6 @@ fun DetailedPetScreenPreviewLight() {
 @Composable
 fun DetailedPetScreenPreviewDark() {
     PetPalTheme {
-        PetCard(null, null) {  }
+        PetCard(null, null) { }
     }
 }

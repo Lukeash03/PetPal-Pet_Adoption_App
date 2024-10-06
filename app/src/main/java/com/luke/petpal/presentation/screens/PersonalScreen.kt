@@ -22,12 +22,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -38,6 +41,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -70,15 +74,18 @@ import com.luke.petpal.R
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.UserProfileViewModel
+import com.luke.petpal.presentation.components.AdoptionPetCard
+import com.luke.petpal.presentation.components.ShimmerListItem
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalScreen(
     userProfileViewModel: UserProfileViewModel?,
     paddingValues: PaddingValues,
-//    onAdoptionPetClick: () -> Unit
+    onAddPetClick: () -> Unit
 ) {
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
@@ -90,7 +97,7 @@ fun PersonalScreen(
         }
     )
 
-    val context = LocalContext.current
+//    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         userProfileViewModel?.fetchProfileImageUrl()
@@ -102,11 +109,17 @@ fun PersonalScreen(
     val profileImageUrl by userProfileViewModel?.profileImageUrl?.collectAsState()
         ?: remember { mutableStateOf(Resource.Loading) }
 
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(key1 = true) {
+        delay(2000)
+        isLoading = false
+    }
+
     Column(
         modifier = Modifier
             .padding(top = paddingValues.calculateTopPadding())
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+//            .fillMaxSize()
+//            .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -116,7 +129,6 @@ fun PersonalScreen(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
-//                .weight(1f)
         ) {
 
             Row(
@@ -137,6 +149,7 @@ fun PersonalScreen(
 
         Column(
             modifier = Modifier
+                .padding(vertical = 12.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -145,7 +158,7 @@ fun PersonalScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 12.dp),
                 shape = RoundedCornerShape(15.dp),
                 elevation = CardDefaults.cardElevation(10.dp),
                 colors = CardDefaults.cardColors()
@@ -156,7 +169,8 @@ fun PersonalScreen(
                 ) {
 
                     Row(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier,
+//                            .fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
 //                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
@@ -244,7 +258,7 @@ fun PersonalScreen(
                                 enabled = false,
                                 singleLine = true,
                                 onValueChange = { },
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(15.dp),
                                 colors = TextFieldDefaults.colors(
                                     disabledTextColor = MaterialTheme.colorScheme.onBackground,
                                     disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
@@ -252,7 +266,9 @@ fun PersonalScreen(
                                     disabledIndicatorColor = Color.Transparent
                                 )
                             )
+
                             Spacer(modifier = Modifier.height(8.dp))
+
                             TextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -261,7 +277,7 @@ fun PersonalScreen(
                                 enabled = false,
                                 singleLine = true,
                                 onValueChange = { },
-                                shape = RoundedCornerShape(10.dp),
+                                shape = RoundedCornerShape(15.dp),
                                 colors = TextFieldDefaults.colors(
                                     disabledTextColor = MaterialTheme.colorScheme.onBackground,
                                     disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
@@ -292,7 +308,7 @@ fun PersonalScreen(
                         userProfileViewModel?.uploadProfileImageAndLocation(imageUri, null)
                     },
                     colors = ButtonDefaults.buttonColors(appColorPrimary),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Box {
                         Text(
@@ -309,7 +325,7 @@ fun PersonalScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp),
+                .padding(top = 16.dp, bottom = paddingValues.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -317,76 +333,111 @@ fun PersonalScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(15.dp),
                 elevation = CardDefaults.cardElevation(10.dp),
                 colors = CardDefaults.cardColors()
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(vertical = 24.dp)
+                        .padding(vertical = 12.dp, horizontal = 12.dp)
                         .clickable {
 
                         },
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        value = "My Adoption Pets",
-                        enabled = false,
-                        onValueChange = { },
-                        leadingIcon = {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.Pets,
-                                contentDescription = "Email"
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "My pets",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            style = TextStyle(
+                                lineHeight = 16.sp
                             )
-                        },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = ""
-                            )
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = TextFieldDefaults.colors(
-                            disabledTextColor = MaterialTheme.colorScheme.onBackground,
-                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface,
-                            disabledIndicatorColor = Color.Transparent,
-                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground
                         )
-                    )
+
+                        IconButton(
+                            onClick = {
+                                onAddPetClick()
+                            },
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    RoundedCornerShape(15.dp)
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add pet",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        if (isLoading) {
+                            items(5) {
+                                ShimmerListItem(
+                                    isLoading = isLoading,
+                                    contentAfterLoading = { },
+                                    modifier = Modifier.padding()
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        } else {
+//                            if (!refreshing) {
+//                                items(petList) { pet ->
+//                                    AdoptionPetCard(
+//                                        pet = pet,
+//                                        onSeeMoreClick = { documentId ->
+//                                            documentId?.let {
+//                                                onSeeMoreClick(it)
+//                                            }
+//                                        }
+//                                    )
+//                                }
+//                            }
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        value = "My Pets",
-                        enabled = false,
-                        onValueChange = { },
-                        leadingIcon = {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Outlined.Pets,
-                                contentDescription = "Email"
-                            )
-                        },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                contentDescription = ""
-                            )
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = TextFieldDefaults.colors(
-                            disabledTextColor = MaterialTheme.colorScheme.onBackground,
-                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface,
-                            disabledIndicatorColor = Color.Transparent,
-                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground
-                        )
-                    )
+
+//                    TextField(
+//                        modifier = Modifier
+//                            .fillMaxWidth(),
+////                            .padding(horizontal = 12.dp),
+//                        value = "My Pets",
+//                        enabled = false,
+//                        onValueChange = { },
+//                        leadingIcon = {
+//                            androidx.compose.material3.Icon(
+//                                imageVector = Icons.Outlined.Pets,
+//                                contentDescription = "Email"
+//                            )
+//                        },
+//                        trailingIcon = {
+//                            Icon(
+//                                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+//                                contentDescription = ""
+//                            )
+//                        },
+//                        shape = RoundedCornerShape(10.dp),
+//                        colors = TextFieldDefaults.colors(
+//                            disabledTextColor = MaterialTheme.colorScheme.onBackground,
+//                            disabledLeadingIconColor = MaterialTheme.colorScheme.onBackground,
+//                            disabledContainerColor = MaterialTheme.colorScheme.surface,
+//                            disabledIndicatorColor = Color.Transparent,
+//                            disabledTrailingIconColor = MaterialTheme.colorScheme.onBackground
+//                        )
+//                    )
                 }
 
             }
@@ -399,7 +450,7 @@ fun PersonalScreen(
 @Composable
 fun PersonalScreenPreviewLight() {
     PetPalTheme {
-        PersonalScreen(null, PaddingValues())
+        PersonalScreen(null, PaddingValues()) { }
     }
 }
 
@@ -407,6 +458,6 @@ fun PersonalScreenPreviewLight() {
 @Composable
 fun PersonalScreenPreviewDark() {
     PetPalTheme {
-        PersonalScreen(null, PaddingValues())
+        PersonalScreen(null, PaddingValues()) { }
     }
 }

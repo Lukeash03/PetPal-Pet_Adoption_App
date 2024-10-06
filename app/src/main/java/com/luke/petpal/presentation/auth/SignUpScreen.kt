@@ -65,7 +65,6 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val emailFocusRequester = FocusRequester()
     val passwordFocusRequester = FocusRequester()
@@ -232,7 +231,6 @@ fun SignUpScreen(viewModel: AuthViewModel?, navController: NavController) {
 
                 Button(
                     onClick = {
-//                        viewModel?.signUp(username, email, password)
                         viewModel?.onEvent(RegistrationFormEvent.Submit)
                     },
                     Modifier

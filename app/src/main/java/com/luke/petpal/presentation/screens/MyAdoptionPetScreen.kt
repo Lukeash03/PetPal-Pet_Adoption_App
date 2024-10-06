@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,10 +40,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.components.AdoptionPetCard
+import com.luke.petpal.presentation.components.ShimmerListItem
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import kotlinx.coroutines.delay
@@ -72,14 +76,19 @@ fun MyAdoptionPetScreen(
     )
 
     val userPetList = homeViewModel?.userPetList?.collectAsState(emptyList())?.value ?: emptyList()
-    val selectedSpecies = homeViewModel?.selectedSpecies?.collectAsState()
     Log.i("MYTAG", "Pet List: $userPetList")
+
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(key1 = true) {
+        delay(2000)
+        isLoading = false
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                top = paddingValues.calculateTopPadding(),
+                top = 24.dp,
                 bottom = paddingValues.calculateBottomPadding(),
                 start = 12.dp,
                 end = 12.dp
@@ -88,124 +97,43 @@ fun MyAdoptionPetScreen(
             .pullRefresh(pullToRefreshState),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-
-                FilterChip(
-                    label = { Text(text = "Cat") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Cat",
-                    onClick = { homeViewModel?.setSpeciesFilter("Cat") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Cat") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FilterChip(
-                    label = { Text(text = "Dog") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Dog",
-                    onClick = { homeViewModel?.setSpeciesFilter("Dog") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Dog") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FilterChip(
-                    label = { Text(text = "Bird") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Bird",
-                    onClick = { homeViewModel?.setSpeciesFilter("Bird") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Bird") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FilterChip(
-                    label = { Text(text = "Other") },
-                    shape = RoundedCornerShape(10.dp),
-                    selected = selectedSpecies?.value == "Other",
-                    onClick = { homeViewModel?.setSpeciesFilter("Other") },
-                    trailingIcon = {
-                        AnimatedVisibility(visible = selectedSpecies?.value == "Other") {
-                            IconButton(
-                                modifier = Modifier.height(24.dp),
-                                onClick = { homeViewModel?.setSpeciesFilter(null) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Cancel,
-                                    contentDescription = "Cancel selection"
-                                )
-                            }
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = appColorPrimary
-                    )
-                )
-            }
 
             LazyColumn(
                 modifier = Modifier.padding()
             ) {
-                if (!refreshing) {
-                    items(userPetList) { pet ->
-                        Log.i("MyAdoptionPetScreen", "Inside MyPet lazy column: $pet")
-                        AdoptionPetCard(
-                            pet = pet,
-                            onSeeMoreClick = { documentId ->
-                                documentId?.let {
-                                    onSeeMoreClick(it)
-                                }
-                            }
+                item {
+                    Text(
+                        text = "My Posts",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                if (isLoading) {
+                    items(10) {
+                        ShimmerListItem(
+                            isLoading = isLoading,
+                            contentAfterLoading = { },
+                            modifier = Modifier.padding()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
+                } else {
+                    if (!refreshing) {
+                        items(userPetList) { pet ->
+                            Log.i("MyAdoptionPetScreen", "Inside MyPet lazy column: $pet")
+                            AdoptionPetCard(
+                                pet = pet,
+                                onSeeMoreClick = { documentId ->
+                                    documentId?.let {
+                                        onSeeMoreClick(it)
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
             }
-        }
 
         PullRefreshIndicator(
             refreshing = refreshing,

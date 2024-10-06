@@ -106,11 +106,15 @@ class HomeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun fetchPetList(species: String?): Resource<List<Pet>> {
+        val currentUserId = currentUser?.uid
         return try {
             val query = if (species != null) {
-                firestore.collection("pets").whereEqualTo("species", species)
+                firestore.collection("pets")
+                    .whereEqualTo("species", species)
+//                    .whereNotEqualTo("userId", currentUserId)
             } else {
                 firestore.collection("pets")
+//                    .whereNotEqualTo("userId", currentUserId)
             }
 
             val petList = query.get()
@@ -118,10 +122,14 @@ class HomeRepositoryImpl @Inject constructor(
                 .documents
                 .mapNotNull { document ->
                     val pet = document.toObject(Pet::class.java)
-                    pet?.copy(
-                        photos = pet.photos?.map { it } ?: emptyList(),
+                    if (pet?.userId != currentUserId) {
+                        pet?.copy(
+                            photos = pet.photos?.map { it } ?: emptyList(),
 //                        petId = document.id
-                    )
+                        )
+                    } else {
+                        null
+                    }
                 }
 
             Log.i("HomeRepositoryImpl", "fetchPetList: $petList ")
@@ -204,6 +212,8 @@ class HomeRepositoryImpl @Inject constructor(
 
     override suspend fun fetchUserById(userId: String): Resource<User> {
         return try {
+            Log.i("HomeRepositoryImpl", "UserId: $userId")
+            Log.i("HomeRepositoryImpl", "UserId: ${currentUser?.uid}")
             val documentSnapshot: DocumentSnapshot =
                 firestore.collection("users").document(userId).get().await()
             val user = documentSnapshot.toObject(User::class.java)

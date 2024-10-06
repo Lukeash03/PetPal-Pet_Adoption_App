@@ -234,7 +234,7 @@ fun UpdatePetCard(
     var vaccineSwitch by remember {
         mutableStateOf(
             ToggleableInfo(
-                isChecked = (pet.vaccinationStatus == true),
+                isChecked = (pet.vaccinationStatus),
                 text = "Vaccine Status"
             )
         )
@@ -244,8 +244,8 @@ fun UpdatePetCard(
     var updatedPet: Pet
 
     val context = LocalContext.current
-    var imageStrings by remember { mutableStateOf<List<String>?>(pet.photos) }
-    var newImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var imageStrings by remember { mutableStateOf(pet.photos) }
+    var newImageStrings by remember { mutableStateOf<List<String>?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(),
@@ -306,6 +306,7 @@ fun UpdatePetCard(
             PetDetailsTextField(
                 value = petName,
                 onValueChange = { petName = it },
+                isError = false,
                 label = "Pet Name",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -339,6 +340,7 @@ fun UpdatePetCard(
                 PetDetailsTextField(
                     value = petBreed,
                     onValueChange = { petBreed = it },
+                    isError = false,
                     label = "Breed",
                     modifier = Modifier
                         .weight(1f)
@@ -378,6 +380,7 @@ fun UpdatePetCard(
                 PetDetailsTextField(
                     value = petWeight.toString(),
                     onValueChange = { petWeight = it.toInt() },
+                    isError = false,
                     label = "Weight",
                     modifier = Modifier
                         .weight(1f),
@@ -389,8 +392,9 @@ fun UpdatePetCard(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 PetDetailsTextField(
-                    value = petColor.toString(),
+                    value = petColor,
                     onValueChange = { petColor = it },
+                    isError = false,
                     label = "Color",
                     modifier = Modifier
                         .weight(1f)
@@ -398,8 +402,9 @@ fun UpdatePetCard(
             }
 
             PetDetailsTextField(
-                value = petDescription.toString(),
+                value = petDescription,
                 onValueChange = { petDescription = it },
+                isError = false,
                 label = "Description",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -458,7 +463,7 @@ fun UpdatePetCard(
                     )
                 }
         ) {
-            if (imageStrings.isNullOrEmpty() && newImages.isEmpty()) {
+            if (imageStrings.isNullOrEmpty() && newImageStrings.isNullOrEmpty()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -475,7 +480,7 @@ fun UpdatePetCard(
                     )
                 }
             } else {
-                val combinedImages = (imageStrings ?: emptyList()) + newImages.map { it.toString() }
+                val combinedImages = imageStrings ?: (emptyList<String>() + newImageStrings) as List<String>
                 val pagerState = rememberPagerState(
                     pageCount = { combinedImages.size }
                 )
@@ -511,7 +516,7 @@ fun UpdatePetCard(
                                             imageStrings =
                                                 imageStrings?.filter { it != combinedImages[index] }
                                         } else {
-                                            newImages = newImages.filterIndexed { newIndex, _ ->
+                                            newImageStrings = newImageStrings?.filterIndexed { newIndex, _ ->
                                                 newIndex != index - (imageStrings?.size ?: 0)
                                             }
                                         }
@@ -558,14 +563,12 @@ fun UpdatePetCard(
         Button(
             onClick = {
                 if (validateInput()) {
-                    val existingPhotoUris: List<Uri>? = imageStrings?.map { Uri.parse(it) }
-                    val compressedNewPhotosUri = compressImages(newImages, context)
+                    val compressedNewPhotoStrings = newImageStrings?.let {
+                        homeViewModel?.compressImages(it, context)
+                    }
 
-                    val compressedExistingPhotoStrings = existingPhotoUris?.map { it.toString() }
-                    val compressedNewPhotoStrings = compressedNewPhotosUri.map { it.toString() }
-
-                    val finalPhotoStrings = (compressedExistingPhotoStrings ?: emptyList()) + compressedNewPhotoStrings
-                    Log.i("UpdatePetScreen", "finalPhotoStrings: $finalPhotoStrings")
+                    val finalPhotoStrings: List<String> =
+                        (imageStrings ?: (emptyList<String>() + compressedNewPhotoStrings)) as List<String>
 
                     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
                     val localDate = LocalDate.parse(formattedDate, formatter)
