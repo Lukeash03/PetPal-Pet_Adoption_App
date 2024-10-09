@@ -2,9 +2,6 @@ package com.luke.petpal.presentation.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.database.FirebaseDatabase
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.ChatRepository
 import com.luke.petpal.domain.data.Chat
@@ -14,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +31,9 @@ class ChatViewModel @Inject constructor(
 
     private val _chatListState = MutableStateFlow<Resource<List<Chat>>?>(null)
     val chatListState: StateFlow<Resource<List<Chat>>?> = _chatListState
+
+    private val _profilePic = MutableStateFlow<String?>(null)
+    val profilePic: StateFlow<String?> = _profilePic
 
     fun sendMessage(chatId: String, message: String) {
         viewModelScope.launch {
@@ -62,6 +61,11 @@ class ChatViewModel @Inject constructor(
                 _messages.value = result
             }
         }
+    }
+
+    suspend fun getProfilePic(chatId: String) {
+        val result = chatRepository.getProfilePicByChatId(chatId)
+        _profilePic.value = result
     }
 
 }

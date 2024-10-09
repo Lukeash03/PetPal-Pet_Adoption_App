@@ -29,7 +29,7 @@ import kotlinx.coroutines.delay
 fun ChatListScreen(
     chatViewModel: ChatViewModel?,
     paddingValues: PaddingValues,
-    onChatClick: (String) -> Unit
+    onChatClick: (String, String?) -> Unit
 ) {
 
     Log.i("ChatHomeScreen", "Inside ChatHomeScreen")
@@ -102,7 +102,9 @@ fun ChatListScreen(
                                 items(chatList) { chat ->
                                     ChatListCard(
                                         chat = chat,
-                                        onChatClick = { onChatClick(chat.chatId, ) }
+                                        onChatClick = {
+                                            onChatClick(chat.chatId, chat.senderName)
+                                        }
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }

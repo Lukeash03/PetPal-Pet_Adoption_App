@@ -69,10 +69,16 @@ import java.util.Locale
 @Composable
 fun ChatScreen(
     chatId: String,
-    chatViewModel: ChatViewModel?
+    username: String?,
+    chatViewModel: ChatViewModel?,
+    onBackPress: () -> Unit,
 ) {
 
     val userId = chatViewModel?.userId
+    LaunchedEffect(Unit) {
+        chatViewModel?.getProfilePic(chatId)
+    }
+    val profilePic = chatViewModel?.profilePic?.collectAsState()?.value
     val messageState = chatViewModel?.messages?.collectAsState()
 
     var newMessage by remember { mutableStateOf("") }
@@ -89,7 +95,9 @@ fun ChatScreen(
 //                    .padding(vertical = 12.dp)
                         ,
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        onBackPress()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "",
@@ -111,7 +119,7 @@ fun ChatScreen(
                                 .background(Color.Transparent)
                         ) {
                             val painter = rememberAsyncImagePainter(
-                                model = R.drawable.lab_1
+                                model = profilePic ?: R.drawable.lab_1
                             )
                             Image(
                                 painter = painter,
@@ -121,7 +129,7 @@ fun ChatScreen(
                         }
 
                         Text(
-                            text = "Username",
+                            text = username ?: "User",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onBackground
@@ -219,7 +227,7 @@ fun ChatScreen(
 @Composable
 fun ChatScreenPreview() {
     PetPalTheme {
-        ChatScreen("", null)
+        ChatScreen("", null, null) { }
     }
 }
 

@@ -24,19 +24,18 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,10 +44,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -56,6 +53,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -67,28 +65,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.luke.petpal.data.models.Resource
-import com.luke.petpal.domain.data.Pet
-import com.luke.petpal.presentation.HomeViewModel
+import com.luke.petpal.domain.data.PersonalPet
+import com.luke.petpal.domain.data.VaccinationEntry
+import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.components.PetDetailsDropdownTextField
 import com.luke.petpal.presentation.components.PetDetailsTextField
 import com.luke.petpal.presentation.components.PetDetailsTextFieldWithDatePicker
+import com.luke.petpal.presentation.components.VaccinationEntryDialog
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.validation.PetFormEvent
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.DatePickerDefaults
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AddPersonalPetScreen(
-    homeViewModel: HomeViewModel?,
+    userProfileViewModel: UserProfileViewModel?,
     onAddPet: () -> Unit,
 ) {
 
@@ -114,19 +118,6 @@ fun AddPersonalPetScreen(
     }
     val dateDialogState = rememberMaterialDialogState()
 
-    var petWeight by remember { mutableStateOf("") }
-    var petColor by remember { mutableStateOf("") }
-    var vaccineSwitch by remember {
-        mutableStateOf(
-            ToggleableInfo(
-                isChecked = false,
-                text = "Vaccine Status"
-            )
-        )
-    }
-    var petDescription by remember { mutableStateOf("") }
-    var pet: Pet
-
     val context = LocalContext.current
     var imageStrings by remember { mutableStateOf<List<String>?>(null) }
 
@@ -139,10 +130,45 @@ fun AddPersonalPetScreen(
             }
         }
     )
+    var showVaccinationDialog by remember { mutableStateOf(false) }
+    val vaccinationEntries = remember { mutableStateListOf<VaccinationEntry>() }
 
-    val uploadStatus = homeViewModel?.uploadStatus?.collectAsState()
+    val petUploadStatus = userProfileViewModel?.petUploadStatus?.collectAsState()
 
-    val petValidationState = homeViewModel?.petValidationState
+    val petValidationState = userProfileViewModel?.petValidationState
+    val validationEvents = userProfileViewModel?.validationEvents?.collectAsState(initial = null)
+    validationEvents?.value?.let { event ->
+        when (event) {
+            is UserProfileViewModel.ValidationEvent.Success -> {
+                val compressedPhotoStrings = imageStrings?.let {
+                    userProfileViewModel.compressImages(it, context)
+                }
+
+                val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                val localDate = LocalDate.parse(formattedDate, formatter)
+
+                val dobTimestamp: Long =
+                    localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                        .toEpochMilli()
+
+                val pet = PersonalPet(
+                    name = petName,
+                    species = selectedSpecies,
+                    breed = petBreed,
+                    gender = petGender,
+                    dob = dobTimestamp,
+                    photos = compressedPhotoStrings,
+                    publishDate = LocalDate.now().toEpochDay()
+                )
+
+                val vaccinations = vaccinationEntries.toList()
+                // Call ViewModel to upload the pet
+                LaunchedEffect(Unit) {
+                    userProfileViewModel.uploadPersonalPet(pet, vaccinations)
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -211,7 +237,7 @@ fun AddPersonalPetScreen(
                             value = petName,
                             onValueChange = {
                                 petName = it
-                                homeViewModel?.onEvent(PetFormEvent.PetNameChanged(it))
+                                userProfileViewModel?.onEvent(PetFormEvent.PetNameChanged(it))
                             },
                             isError = petValidationState?.petNameError != null,
                             label = "Pet Name",
@@ -240,7 +266,7 @@ fun AddPersonalPetScreen(
                                     value = selectedSpecies,
                                     onValueChange = {
                                         selectedSpecies = it
-                                        homeViewModel?.onEvent(PetFormEvent.PetSpeciesChanged(it))
+                                        userProfileViewModel?.onEvent(PetFormEvent.PetSpeciesChanged(it))
                                     },
                                     label = "Species",
                                     options = speciesOptions,
@@ -266,7 +292,7 @@ fun AddPersonalPetScreen(
                                     value = petBreed,
                                     onValueChange = {
                                         petBreed = it
-                                        homeViewModel?.onEvent(PetFormEvent.PetBreedChanged(it))
+                                        userProfileViewModel?.onEvent(PetFormEvent.PetBreedChanged(it))
                                     },
                                     isError = petValidationState?.petBreedError != null,
                                     label = "Breed",
@@ -291,7 +317,7 @@ fun AddPersonalPetScreen(
                                         value = petGender,
                                         onValueChange = {
                                             petGender = it
-                                            homeViewModel?.onEvent(
+                                            userProfileViewModel?.onEvent(
                                                 PetFormEvent.PetGenderChanged(
                                                     it
                                                 )
@@ -325,30 +351,108 @@ fun AddPersonalPetScreen(
                             }
                         }
 
-                        Row(
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Vaccination History",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            IconButton(
-                                onClick = {  },
-                                modifier = Modifier.background(
+                                .padding(vertical = 4.dp)
+                                .border(
+                                    0.5.dp,
+                                    MaterialTheme.colorScheme.onBackground.copy(0.5f),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .background(
                                     MaterialTheme.colorScheme.background,
-                                    RoundedCornerShape(15.dp)
-                                ),
-
+                                    RoundedCornerShape(10.dp)
+                                )
+//                                .fillMaxHeight()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+//                                    .fillMaxHeight()
+//                                    .verticalScroll(rememberScrollState())
                             ) {
-                                Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Vaccination History",
+                                        textDecoration = TextDecoration.Underline,
+                                        fontSize = 20.sp,
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                ) {
+                                    Button(
+                                        onClick = { showVaccinationDialog = true },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.background
+                                        )
+                                    ) {
+                                        Text(
+                                            text = "Add new entry",
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                    Button(
+                                        onClick = { /*TODO*/ },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.background
+                                        )
+                                    ) {
+                                        Text(
+                                            text = "Add reminder",
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+
+                                VaccinationEntryDialog(
+                                    showDialog = showVaccinationDialog,
+                                    onDismiss = { showVaccinationDialog = false },
+                                    onSave = { vaccineName, doctorName, date, reminder ->
+                                        // Handle the saved vaccination entry data
+                                        vaccinationEntries.add(
+                                            VaccinationEntry(
+                                                vaccineName = vaccineName,
+                                                doctorName = doctorName,
+                                                date = date,
+                                                reminder = reminder
+                                            )
+                                        )
+                                    }
+                                )
+
+                                if (vaccinationEntries.isNotEmpty()) {
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+//                                            .weight(1f)
+                                    ) {
+                                        items(vaccinationEntries) { entry ->
+                                            VaccinationEntryItem(entry)
+                                        }
+                                    }
+                                } else {
+                                    Text(
+                                        text = "No vaccination entries yet",
+                                        modifier = Modifier.padding(8.dp),
+                                        color = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+
                             }
                         }
-
                     }
 
                     Box(
@@ -463,7 +567,7 @@ fun AddPersonalPetScreen(
 
                     Button(
                         onClick = {
-                            homeViewModel?.onEvent(PetFormEvent.Submit)
+                            userProfileViewModel?.onEvent(PetFormEvent.Submit)
                         },
                         Modifier
                             .fillMaxWidth()
@@ -471,11 +575,27 @@ fun AddPersonalPetScreen(
                         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Box {
-                            Text(
-                                text = "Add Pet",
-                                Modifier.padding(8.dp)
-                            )
+                        when (petUploadStatus?.value) {
+                            is Resource.Failure -> {
+
+                            }
+
+                            is Resource.Loading -> {
+                                CircularProgressIndicator()
+                            }
+
+                            is Resource.Success -> {
+
+                            }
+
+                            null -> {
+                                Box {
+                                    Text(
+                                        text = "Add Pet",
+                                        Modifier.padding(8.dp)
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -486,7 +606,7 @@ fun AddPersonalPetScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            uploadStatus?.value?.let {
+            petUploadStatus?.value?.let {
                 when (it) {
                     is Resource.Failure -> {
                         LaunchedEffect(it) {
@@ -511,14 +631,81 @@ fun AddPersonalPetScreen(
 
     }
 
+    MaterialDialog(
+        dialogState = dateDialogState,
+        shape = RoundedCornerShape(10.dp),
+        buttons = {
+            positiveButton(text = "Ok")
+            negativeButton(text = "Cancel")
+        }
+    ) {
+        datepicker(
+            initialDate = LocalDate.now(),
+            title = "Pick a date",
+            colors = DatePickerDefaults.colors(
+                headerBackgroundColor = MaterialTheme.colorScheme.background,
+                dateActiveBackgroundColor = MaterialTheme.colorScheme.background
+            )
+        ) {
+            pickedDOB = it
+        }
+    }
 
+}
+
+@Composable
+fun VaccinationEntryItem(entry: VaccinationEntry) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+//                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+//                .padding(16.dp)
+        ) {
+            Text(
+                text = "Vaccine: ${entry.vaccineName}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (!entry.doctorName.isNullOrEmpty()) {
+                Text(
+                    text = "Doctor: ${entry.doctorName}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Text(text = "Date: ${entry.date}", style = MaterialTheme.typography.bodySmall)
+            if (entry.reminder) {
+                Text(text = "Reminder set", color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun VaccinationEntryItemPreview() {
+    PetPalTheme {
+        VaccinationEntryItem(
+            entry = VaccinationEntry(
+                petId = "",
+                vaccineName = "Rabies",
+                doctorName = "Sam",
+                date = System.currentTimeMillis(),
+                reminder = false
+            )
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun AddPersonalPetPreview() {
     PetPalTheme {
-        AddPersonalPetScreen(homeViewModel = null) { }
+        AddPersonalPetScreen(userProfileViewModel = null) { }
     }
 }
 
@@ -526,6 +713,13 @@ fun AddPersonalPetPreview() {
 @Composable
 fun AddPersonalPetPreviewDark() {
     PetPalTheme {
-        AddPersonalPetScreen(homeViewModel = null) { }
+        AddPersonalPetScreen(userProfileViewModel = null) { }
     }
 }
+
+//data class VaccinationEntry(
+//    val vaccineName: String,
+//    val doctorName: String?,
+//    val date: LocalDate,
+//    val reminder: Boolean
+//)

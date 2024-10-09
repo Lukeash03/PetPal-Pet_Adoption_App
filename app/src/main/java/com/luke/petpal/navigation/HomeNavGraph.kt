@@ -1,5 +1,6 @@
 package com.luke.petpal.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -15,6 +16,7 @@ import com.luke.petpal.presentation.screens.AdoptionScreen
 import com.luke.petpal.presentation.chat.ChatListScreen
 import com.luke.petpal.presentation.chat.ChatScreen
 import com.luke.petpal.presentation.chat.ChatViewModel
+import com.luke.petpal.presentation.screens.AddPersonalPetScreen
 import com.luke.petpal.presentation.screens.DetailedPetScreen
 import com.luke.petpal.presentation.screens.LikedScreen
 import com.luke.petpal.presentation.screens.MyAdoptionPetScreen
@@ -109,15 +111,24 @@ fun HomeNavGraph(
             ChatListScreen(
                 chatViewModel = chatViewModel,
                 paddingValues = paddingValues,
-                onChatClick = { chatId ->
-                    navController.navigate("chat_screen/$chatId")
+                onChatClick = { chatId, otherUsername ->
+                    val encodedUsername = Uri.encode(otherUsername)
+                    navController.navigate("chat_screen/$chatId/$encodedUsername")
                 }
             )
         }
-        composable(route = "chat_screen/{chatId}") { backStackEntry ->
+        composable(route = "chat_screen/{chatId}/{otherUsername}") { backStackEntry ->
             val chatId = backStackEntry.arguments?.getString("chatId")
+            val username = backStackEntry.arguments?.getString("otherUsername")?.let { Uri.decode(it) }
             chatId?.let {
-                ChatScreen(chatId = chatId, chatViewModel = chatViewModel)
+                ChatScreen(
+                    chatId = chatId,
+                    username = username,
+                    chatViewModel = chatViewModel,
+                    onBackPress = {
+                        navController.popBackStack()
+                    }
+                )
             }
         }
         composable(route = BottomBarScreen.Personal.route) {
@@ -125,9 +136,16 @@ fun HomeNavGraph(
                 userProfileViewModel,
                 paddingValues,
                 onAddPetClick = {
-                    navController.navigate("add_pet")
+                    navController.navigate("add_personal_pet")
                 }
             )
+        }
+        composable(route = "add_personal_pet") {
+            AddPersonalPetScreen(
+                userProfileViewModel = userProfileViewModel,
+                onAddPet = {
+                    navController.navigate(BottomBarScreen.Personal.route)
+                })
         }
     }
 

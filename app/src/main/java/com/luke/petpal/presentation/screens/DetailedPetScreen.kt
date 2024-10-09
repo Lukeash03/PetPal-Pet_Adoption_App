@@ -151,6 +151,7 @@ fun DetailedPetScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> Unit) {
 
@@ -335,14 +336,12 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(120.dp, 200.dp)
-                    .verticalScroll(rememberScrollState())
+                    .heightIn(120.dp)
             ) {
                 Text(
                     text = pet?.description ?: "No description to show.",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
-//                    minLines = 4,
                     textAlign = if (pet?.description == null) TextAlign.Center else TextAlign.Start,
                     modifier = if (pet?.description == null) {
                         Modifier
@@ -353,12 +352,11 @@ fun PetCard(homeViewModel: HomeViewModel?, pet: Pet?, onChatClick: (String) -> U
                             .align(Alignment.TopStart)
                             .fillMaxWidth()
                     }
-//                    .align()
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+//        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier

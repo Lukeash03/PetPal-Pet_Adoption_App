@@ -14,6 +14,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.luke.petpal.data.models.Resource
 import com.luke.petpal.data.repository.UserProfileRepository
 import com.luke.petpal.data.utils.awaitC
+import com.luke.petpal.domain.data.PersonalPet
+import com.luke.petpal.domain.data.Pet
+import com.luke.petpal.domain.data.VaccinationEntry
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 class UserProfileRepositoryImpl @Inject constructor(
@@ -118,6 +123,83 @@ class UserProfileRepositoryImpl @Inject constructor(
             e.printStackTrace()
             Resource.Failure(e)
         }
+    }
+
+    override suspend fun uploadPersonalPet(
+        pet: PersonalPet,
+        vaccinations: List<VaccinationEntry>
+    ): Resource<Unit> {
+        val photoUri = pet.photos?.map { Uri.parse(it) }
+        val photoUrls = photoUri?.mapNotNull { uri ->
+            val filename = uri.lastPathSegment ?: return@mapNotNull null
+            val storageRef = storage.reference.child("pets/${UUID.randomUUID()}/$filename")
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        } ?: emptyList()
+
+        val dob = pet.dob?.toString()?.toLongOrNull()
+
+        val petData = mapOf(
+            "userId" to currentUser?.uid,
+            "name" to pet.name,
+            "species" to pet.species,
+            "breed" to pet.breed,
+            "gender" to pet.gender,
+            "dob" to dob,
+            "publishDate" to pet.publishDate,
+            "photos" to photoUrls,
+        )
+
+        return try {
+            val documentRef = firestore.collection("personalPets")
+                .add(petData)
+                .await()
+            documentRef.update("petId", documentRef.id)
+
+            val vaccinationRef = documentRef.collection("vaccinations")
+            vaccinations.forEach { vaccination ->
+                val vaccinationData = mapOf(
+                    "petId" to documentRef.id,
+                    "vaccineName" to vaccination.vaccineName,
+                    "doctorName" to vaccination.doctorName,
+                    "date" to vaccination.date,
+                    "reminder" to vaccination.reminder,
+                    "reminderDate" to vaccination.reminderDate
+                )
+                vaccinationRef.add(vaccinationData).await()
+            }
+
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Resource.Failure(e)
+        }
+
+    }
+
+    override suspend fun fetchPersonalPets(): Resource<List<PersonalPet>> {
+        val currentUserId = currentUser?.uid
+
+        return try {
+            val petList = firestore.collection("personalPets")
+                .get()
+                .await()
+                .documents
+                .mapNotNull { document ->
+                    val pet = document.toObject(PersonalPet::class.java)
+                    if (pet?.userId == currentUserId) {
+                        pet?.copy(
+                            photos = pet.photos?.map { it } ?: emptyList(),
+                        )
+                    } else {
+                        null
+                    }
+                }
+            Resource.Success(petList)
+        } catch (e: Exception) {
+            Resource.Failure(e)
+        }
+
     }
 
 }

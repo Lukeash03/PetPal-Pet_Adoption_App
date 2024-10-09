@@ -132,4 +132,39 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getProfilePicByChatId(chatId: String): String? {
+        val currentUserId = currentUser?.uid
+
+        return try {
+            // Reference to the chat document
+            val chatDocument = firestore.collection("chats")
+                .document(chatId)
+                .get()
+                .await()
+
+            // Get participants field from the chat document (List of user IDs)
+            val participants = chatDocument.get("participants") as? List<String>
+
+            // Return null if participants are null or don't contain exactly 2 users
+            if (participants == null || participants.size != 2) {
+                return null
+            }
+
+            // Identify the other user (the one who is not the current user)
+            val otherUserId = participants.firstOrNull { it != currentUserId } ?: return null
+
+            // Fetch the other user's document from the 'users' collection
+            val userDocument = firestore.collection("users")
+                .document(otherUserId)
+                .get()
+                .await()
+
+            // Get the profile picture URL from the user document
+            userDocument.getString("profileImageUrl")
+        } catch (e: Exception) {
+            Log.e("ChatRepository", "Error fetching profile pic", e)
+            null
+        }
+    }
+
 }

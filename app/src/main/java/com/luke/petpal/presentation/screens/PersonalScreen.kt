@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
@@ -36,6 +37,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -52,6 +55,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,18 +79,35 @@ import com.luke.petpal.data.models.Resource
 import com.luke.petpal.presentation.HomeViewModel
 import com.luke.petpal.presentation.UserProfileViewModel
 import com.luke.petpal.presentation.components.AdoptionPetCard
+import com.luke.petpal.presentation.components.PersonalPetCard
 import com.luke.petpal.presentation.components.ShimmerListItem
 import com.luke.petpal.presentation.theme.PetPalTheme
 import com.luke.petpal.presentation.theme.appColorPrimary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PersonalScreen(
     userProfileViewModel: UserProfileViewModel?,
     paddingValues: PaddingValues,
     onAddPetClick: () -> Unit
 ) {
+
+    val refreshScope = rememberCoroutineScope()
+    var refreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = refreshScope.launch {
+        refreshing = true
+        delay(1000)
+        userProfileViewModel?.fetchPersonalPets()
+        refreshing = false
+    }
+
+    val pullToRefreshState = rememberPullRefreshState(
+        refreshing = refreshing,
+        onRefresh = ::refresh
+    )
 
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -96,8 +117,6 @@ fun PersonalScreen(
             imageUri = uri
         }
     )
-
-//    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         userProfileViewModel?.fetchProfileImageUrl()
@@ -114,6 +133,8 @@ fun PersonalScreen(
         delay(2000)
         isLoading = false
     }
+
+    val petList = userProfileViewModel?.petList?.collectAsState(emptyList())?.value ?: emptyList()
 
     Column(
         modifier = Modifier
@@ -325,7 +346,8 @@ fun PersonalScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = paddingValues.calculateBottomPadding()),
+                .padding(top = 16.dp, bottom = paddingValues.calculateBottomPadding())
+                .pullRefresh(pullToRefreshState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -394,16 +416,16 @@ fun PersonalScreen(
                             }
                         } else {
 //                            if (!refreshing) {
-//                                items(petList) { pet ->
-//                                    AdoptionPetCard(
-//                                        pet = pet,
-//                                        onSeeMoreClick = { documentId ->
-//                                            documentId?.let {
+                                items(petList) { pet ->
+                                    PersonalPetCard(
+                                        pet = pet,
+                                        onSeeMoreClick = { documentId ->
+                                            documentId?.let {
 //                                                onSeeMoreClick(it)
-//                                            }
-//                                        }
-//                                    )
-//                                }
+                                            }
+                                        }
+                                    )
+                                }
 //                            }
                         }
                     }
